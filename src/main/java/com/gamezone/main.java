@@ -1,7 +1,7 @@
 
-package com.gamezone.main;
+package com.gamezone;
 
-public class GameZoneUnicesar {
+public class main {
 
     public static void main(String[] args) {
         System.out.println("Hello World!");
