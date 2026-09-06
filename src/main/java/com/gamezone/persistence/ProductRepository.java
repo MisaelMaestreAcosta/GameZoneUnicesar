@@ -13,16 +13,26 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * handles the flat-file data persistence for product entities in the GameZone system.
+ * responsible for reading, writing, parsing, and serializing product records to and from
+ * @author Usuario
+ */
 public class ProductRepository {
 
     private final Path filePath;
     private static final String SEPARATOR = ";";
 
+    /**
+     * constructor that initializes the repository with the default path
+     */
     public ProductRepository() {
         this.filePath = Paths.get("data", "products.txt");
         ensureFileExists();
     }
-
+    /**
+     * verifies and creates the directories and the products file if they do not exist
+     */
     private void ensureFileExists() {
         try {
             if (filePath.getParent() != null && Files.notExists(filePath.getParent())) {
@@ -38,6 +48,7 @@ public class ProductRepository {
 
     /**
      *loads all products stored in the .txt file
+     * @return list of all products loaded from the file
      */
     public List<Product> loadAll() {
         List<Product> products = new ArrayList<>();
@@ -62,7 +73,8 @@ public class ProductRepository {
     }
 
     /**
-     *overwrites the .txt file, saving the complete list of products
+     * overwrites the .txt file, saving the complete list of products
+     * @param products the list of {@link Product} entities to persist
      */
     public void saveAll(List<Product> products) {
         try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
@@ -79,7 +91,9 @@ public class ProductRepository {
     }
 
     /**
-     *converts a Product entity into a delimited text line format
+     * serializes a concrete {@link Product} instance into a delimited string format suitable for text storage
+     * @param product product to be converted
+     * @return Text string with product fields separated by semicolons
      */
     private String toRecord(Product product) {
         if (product instanceof Videogame game) {
@@ -109,7 +123,9 @@ public class ProductRepository {
     }
 
     /**
-     *converts a line from the .txt file into a Product object
+     * deserializes a single line from the text file into a concrete {@link Product} entity
+     * @param line the delimited string record read from the file
+     * @return a instantiated {@link Videogame} or {@link Console} instance, or {@code null} if parsing fails or the line format is invalid
      */
     private Product parseRecord(String line) {
         String[] fields = line.split(SEPARATOR);
