@@ -9,10 +9,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * service class responsible for managing product operations within the GameZone system
+ * @author Usuario
+ */
 public class ProductService {
     private final ProductRepository repository;
     private final List<Product> products;
 
+    /**
+     * constructs a new {@code ProductService} and loads initial products from the repository
+     * @param repository the persistence repository implementation for products
+     */
     public ProductService(ProductRepository repository) {
         this.repository = repository;
         this.products = new ArrayList<>(repository.loadAll());
@@ -20,6 +28,13 @@ public class ProductService {
 
     /**
      * Registers a new video game in the inventory and persists the change
+     * @param id the unique identifier of the videogame
+     * @param title the videogame title
+     * @param platform the gaming platform
+     * @param availability the available stock quantity
+     * @param price the selling price of the video game
+     * @param genre the game genre
+     * @param ageRating the age rating of the game
      */
     public void registerVideoGame(String id, String title, double price, int availability,String platform, String genre, String ageRating) {
         validateCommonFields(id, title, price, availability);
@@ -31,6 +46,13 @@ public class ProductService {
 
     /**
      *registers a new console in the inventory and persists the change
+     * @param id the unique identifier for the console
+     * @param title the display title of the console
+     * @param price the selling price of the console
+     * @param availability the available stock quantity
+     * @param brand  the console's brand
+     * @param generation the console's generation
+     * @param model the console's model
      */
     public void registerConsole(String id, String title, double price, int availability, String brand, String model, String generation) {
         validateCommonFields(id, title, price, availability);
@@ -42,6 +64,7 @@ public class ProductService {
 
     /**
      * returns an unmodifiable view of every product currently in the inventory
+     * @return the list of all products
      */
     public List<Product> listAllProducts() {
         return Collections.unmodifiableList(products);
@@ -49,6 +72,8 @@ public class ProductService {
 
     /**
      *adjusts the stock of the product with the given id, if found, and persists the change
+     * @param productId the id of the product to update
+     * @param quantity the amount to add to the current stock
      */
     public void updateStock(String productId, int quantity) {
         Product product = findById(productId);
@@ -66,6 +91,8 @@ public class ProductService {
     }
     /**
      * finds a product by its id
+     * @param id the product ID to search for
+     * @return  the matching {@link Product} if found, or {@code null} otherwise
      */
     public Product findById(String id) {
         for (Product product : products) {
