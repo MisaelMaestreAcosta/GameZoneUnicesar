@@ -1,0 +1,46 @@
+# Domain Analysis - GameZone Unicesar
+
+## 1. What attributes are common to all people interacting with the store, and which are specific to each type of person? How is this distinction reflected in a class hierarchy?
+**Answer:**
+Common attributes: id, name, and phoneNumber. Specific attributes: Customer has email and purchaseHistory; Seller has employeeCode and workShift. Class hierarchy: An abstract Person base class stores the common fields, and Customer and Seller extend it to reuse code and represent the is-a relationship.
+
+## 2. Should there be a class representing a "generic person" without specifying their role? Why or why not? What implication does this decision have on the possibility of instantiating said class?
+**Answer:**
+Yes, a generic Person class is needed to centralize shared attributes and avoid code duplication. However, it must be declared abstract so it cannot be instantiated, because everyone in the store must have a specific role (Customer or Seller).
+
+## 3. What characteristics do all products sold by the store have in common, regardless of their type? What characteristics are specific to each type of product?
+**Answer:**
+Common attributes: id, name, price, and stock. Specific attributes: VideoGame has genre, platform, and developer; Console has brand and storageCapacity. Implementation: An abstract Product class holds shared data, while VideoGame and Console inherit from it and add their own fields.
+
+## 4. Each type of product must be able to present a description that integrates its specific characteristics. How should this behavior be declared in the base class to ensure that all subclasses implement it in their own way? What object-oriented programming mechanism allows this?
+**Answer:**
+Declaration: Declare an abstract method getDescription() in the Product class without a body. OOP mechanism: Polymorphism and method overriding (@Override), which forces subclasses like VideoGame and Console to implement their own custom description logic.
+
+## 5. A sale involves a customer, a salesperson, and one or more products. What types of relationships exist between the class representing the sale and the other classes in the system? Are these relationships inheritance, association, composition, or another type? Justify.
+**Answer:**
+The relationships between the Sale class and Customer or Salesperson are direct associations, as both customers and salespeople exist independently of any individual sale and maintain their own distinct lifecycles. In contrast, the relationship between Sale and its line items (SalesLineItem) is composition, because line items cannot exist without an overarching sale and are strictly bound to its lifecycle; destroying a sale destroys its line items. Finally, the relationship between each line item and a Product is an association, where line items reference products while products exist independently in the system catalog. None of these are inheritance relationships because a sale is not a specialized type of customer, seller, or product, but rather a transactional entity that links these domain concepts together.
+
+## 6. Should the sale be responsible for calculating its own total, or should this responsibility belong to another class? Argue your decision.
+**Answer:**
+The Sale class should be responsible for calculating its own total, adhering directly to the Information Expert principle in Object-Oriented Design. Because Sale encapsulates the collection of SalesLineItem instances—each holding specific quantities, unit prices, and line discounts—it possesses or has direct access to all the necessary data required to compute the aggregate total. Under this design, high cohesion and encapsulation are preserved: the Sale delegates subtotal calculations to individual line items and sums the results, preventing external classes from needing to reach into the internal structure of the sale to perform calculations.
+
+## 7. How is it ensured in the design that a sale cannot be registered without at least one product? At what point in the system should this rule be validated?
+**Answer:**
+This constraint is enforced through class invariants and behavioral encapsulation within the domain model, ensuring that a Sale cannot transition into a "Registered" or "Completed" state while its collection of line items is empty. At the implementation level, this rule must be validated inside the domain layer—specifically within the Sale class itself (e.g., inside a constructor, factory method, or the completeSale() domain method) before state changes are committed. Validating this rule directly inside the domain entity ensures that core business invariants are protected regardless of which external application service, controller, or UI workflow triggers the operation.
+
+## 8. How is the automatic inventory update reflected in the design when a sale is registered? What classes are involved in this operation?
+**Answer:**
+The automatic inventory update is typically modeled using either an application orchestration flow or an Observer/Domain Event pattern to maintain clean separation between the sales and inventory domains. The primary classes involved are Sale, SalesLineItem, Inventory (or StockItem), and an InventoryService (or SaleRegisteredEventHandler). When Sale.register() executes, it raises a SaleRegisteredEvent containing the purchased products and quantities, which an InventoryService receives to look up the relevant Inventory aggregates and invoke stock deduction methods (e.g., inventory.deductStock(productId, quantity)), keeping the sales aggregate decoupled from stock management logic.
+
+## 9. The system must be organized into four layers: model, persistence, services, and user interface. What types of classes belong to each layer? What criterion determines which layer a class should be placed in?
+**Answer:**
+Model: Here are the classes representing the system's main elements, such as Console, Product, Person, videogame, etc. Persistence: Here you will find the classes responsible for saving and retrieving information. Service: This is where the system's logic resides—that is, the classes that execute the program's operations and rules. To determine where a class belongs, I primarily look at its responsibility. The class should be placed in the layer that corresponds to the function it performs.
+
+## 10. Why shouldn't the logic for saving and retrieving data from files be placed within domain classes? What problems arise when these responsibilities are mixed?
+**Answer:**
+- Because domain classes should be responsible for representing the system's objects and rules, not for knowing how data is stored in files.
+- If we mix these responsibilities, the code becomes harder to understand and maintain. Furthermore, if the data storage method changes later, the domain classes would also have to be modified.
+
+## 11. Which dependencies are permitted between the layers, and which are prohibited? Justify the rationale behind the permitted dependencies.
+**Answer:**
+Permitted dependencies must follow the layering order. The user interface can use the services, the services can use the model and the persistence layer, and the persistence layer can work with the model. This ensures that each layer has its own responsibility and makes the system easier to modify and maintain. Thus, if I change the interface or the way data is saved, I do not have to change the entire program.
