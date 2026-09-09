@@ -89,6 +89,22 @@ public class ProductService {
             throw new IllegalArgumentException("Product with ID " + productId + " not found.");
         }
     }
+    void restoreStock(String productId, int quantity){
+        Product product = findById(productId);
+        if (product != null) {
+            
+            int newAvailability = product.getAvailability() + quantity;
+            if (newAvailability < 0) {
+                throw new IllegalArgumentException("Stock cannot be negative.");
+            }
+            product.setAvailability(newAvailability);
+            repository.saveAll(products);
+        } else {
+            throw new IllegalArgumentException("Product with ID " + productId + " not found.");
+        }
+        
+    }
+
     /**
      * finds a product by its id
      * @param id the product ID to search for
@@ -102,6 +118,7 @@ public class ProductService {
         }
         return null;
     }
+
 
     /**
      * validates domain rules before instantiating products

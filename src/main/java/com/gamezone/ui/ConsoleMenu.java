@@ -61,6 +61,8 @@ public class ConsoleMenu {
             }
         } while (option != 0);
     }
+    
+    
 
     private void showProductCatalog() {
         System.out.println("\n--- CATÁLOGO DE PRODUCTOS DISPONIBLES ---");
@@ -213,4 +215,7 @@ public class ConsoleMenu {
             System.out.println(s);
         }
     }
+    
+    
+
 }
