@@ -18,7 +18,7 @@ public class Return {
     
     public Return(String returnid, LocalDate datereturn, Sale originalSale, List<Product> listOfRetornedProduct, String reasonReturn, double refund) {
         this.returnid = returnid;
-        this.dateReturn = dateReturn;
+        this.dateReturn = datereturn;  
         this.originalSale = originalSale;
         this.listOfRetornedProduct = listOfRetornedProduct;
         this.reasonReturn = reasonReturn;
