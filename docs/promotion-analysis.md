@@ -15,6 +15,6 @@
 **Answer:**
 ##
 
-## 5. 
+## 5. Active promotions are determined by comparing the current date with the start and end dates of each promotion. Where is this validation performed (in the `Promotion` class, in the `PromotionService`, or in both)? Justify your answer.
 **Answer**
-##
+## Validity validation must be handled across both classes, which have complementary responsibilities: the `Promotion` class implements the atomic domain rule via the `isActive(LocalDate date)` method—since it owns the start and end date data—while `PromotionService` manages orchestration at the service layer by invoking that method with the current date when filtering promotions for operations such as `listActivePromotions()` or `findBestPromotionFor(sale)`. This distribution is valid because it adheres to the Information Expert principle (GRASP) by keeping the evaluation logic within the entity that holds the dates, and it maintains a separation of concerns by preventing the model class from depending on the system clock or list management, delegating that business flow to the service instead.
