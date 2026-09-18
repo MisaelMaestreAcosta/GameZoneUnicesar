@@ -75,7 +75,7 @@ public class AccessoryRepository {
     }
 
     private String toTextLine(Accessory accessory) {
-        String compatibleConsoles = String.join("|", accessory.getCompatibleConsoles());
+        String compatibleConsoles = String.join("|", accessory.getCompatibleConsoleIds());
 
         if (accessory instanceof Controller controller) {
             return String.join(FIELD_DELIMITER,
@@ -94,7 +94,7 @@ public class AccessoryRepository {
                     String.valueOf(cable.getPrice()),
                     String.valueOf(cable.getAvailability()),
                     compatibleConsoles,
-                    String.valueOf(cable.getLengthInMeters()),
+                    String.valueOf(cable.getLenght()),
                     cable.getConnectorType());
         } else if (accessory instanceof Memory memory) {
             return String.join(FIELD_DELIMITER,
@@ -105,7 +105,7 @@ public class AccessoryRepository {
                     String.valueOf(memory.getAvailability()),
                     compatibleConsoles,
                     String.valueOf(memory.getCapacityInGb()),
-                    memory.getMemoryType());
+                    memory.getTypeMemory());
         }
         throw new IllegalArgumentException("Tipo de accesorio desconocido.");
     }
@@ -124,22 +124,19 @@ public class AccessoryRepository {
         switch (type) {
             case "CONTROLLER": {
                 String connectionType = fields[6];
-                Controller controller = new Controller(id, title, price, availability, connectionType);
-                controller.setCompatibleConsoles(compatibleConsoles);
+                Controller controller = new Controller(id, title, price, availability, compatibleConsoles, connectionType);
                 return controller;
             }
             case "CABLE": {
                 double lengthInMeters = Double.parseDouble(fields[6]);
                 String connectorType = fields[7];
-                Cable cable = new Cable(id, title, price, availability, lengthInMeters, connectorType);
-                cable.setCompatibleConsoles(compatibleConsoles);
+                Cable cable = new Cable(id, title, price, availability, compatibleConsoles, lengthInMeters, connectorType);
                 return cable;
             }
             case "MEMORY": {
                 int capacityInGb = Integer.parseInt(fields[6]);
                 String memoryType = fields[7];
-                Memory memory = new Memory(id, title, price, availability, capacityInGb, memoryType);
-                memory.setCompatibleConsoles(compatibleConsoles);
+                Memory memory = new Memory(id, title, price, availability, compatibleConsoles, capacityInGb, memoryType);
                 return memory;
             }
             default:
