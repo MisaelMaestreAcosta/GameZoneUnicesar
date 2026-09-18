@@ -7,9 +7,20 @@ import com.gamezone.model.Sale;
 import com.gamezone.model.SalesLineItem;
 import com.gamezone.model.Seller;
 import com.gamezone.service.PersonService;
+
+
 import com.gamezone.service.ProductService;
 import com.gamezone.service.ReturnService;
+
 import com.gamezone.service.SaleService;
+import com.gamezone.model.Promotion;
+import com.gamezone.service.PromotionService;
+
+
+import com.gamezone.model.Accessory;
+import com.gamezone.service.AccessoryService;
+
+import java.util.Arrays;
 
 
 import com.gamezone.model.Accessory;
@@ -23,6 +34,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Text-based console interface providing interactive menus for catalog, sales,
@@ -36,9 +49,25 @@ public class ConsoleMenu {
 
     private AccessoryService accessoryService;
 
+    private PromotionService promotionService;
+
     private final ReturnService returnService;
 
     private final Scanner scanner;
+
+    public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService) {
+        this.productService = productService;
+        this.personService = personService;
+        this.saleService = saleService;
+        this.returnService = null;
+        this.scanner = new Scanner(System.in);
+    }
+
+
+    private final ReturnService returnService;
+
+    private final Scanner scanner;
+
 
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, AccessoryService accessoryService, ReturnService returnService) {
         this.productService = productService;
@@ -46,6 +75,34 @@ public class ConsoleMenu {
         this.saleService = saleService;
         this.accessoryService = accessoryService;
         this.returnService = returnService;
+        this.scanner = new Scanner(System.in);
+    }
+
+    public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, PromotionService promotionService) {
+        this.productService = productService;
+        this.personService = personService;
+        this.saleService = saleService;
+        this.promotionService = promotionService;
+        this.returnService = null;
+        this.scanner = new Scanner(System.in);
+    }
+
+    public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, AccessoryService accessoryService) {
+        this.productService = productService;
+        this.personService = personService;
+        this.saleService = saleService;
+        this.accessoryService = accessoryService;
+        this.returnService = null;
+        this.scanner = new Scanner(System.in);
+    }
+
+    public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, AccessoryService accessoryService, PromotionService promotionService) {
+        this.productService = productService;
+        this.personService = personService;
+        this.saleService = saleService;
+        this.accessoryService = accessoryService;
+        this.promotionService = promotionService;
+        this.returnService = null;
         this.scanner = new Scanner(System.in);
     }
 
@@ -63,8 +120,15 @@ public class ConsoleMenu {
             System.out.println("6. Ver Historial de Ventas");
 
             System.out.println("7. Gestión de Accesorios");
+
+            System.out.println("8. Gestión de Promociones");
+            System.out.println("9. Gestión de Devoluciones");
+            System.out.println("10. Consultar Balance Mensual");
+
+
             System.out.println("8. Gestión de Devoluciones");
             System.out.println("9. Consultar Balance Mensual");
+
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
 
@@ -79,8 +143,15 @@ public class ConsoleMenu {
                     case 6 -> showSalesHistory();
 
                     case 7 -> showAccessoryMenu();
+
+                    case 8 -> showPromotionMenu();
+                    case 9 -> handleReturnsMenu();
+                    case 10 -> showMonthlyBalance();
+                           
+
                     case 8 -> handleReturnsMenu();
                     case 9 -> showMonthlyBalance();
+
 
                     case 0 -> System.out.println("Saliendo del sistema... ¡Hasta luego!");
                     default -> System.out.println("Opción inválida. Intente de nuevo.");
@@ -232,12 +303,23 @@ public class ConsoleMenu {
         System.out.println(sale);
     }
 
+    private List<Sale> getAllSalesInternal() {
+        List<Customer> customers = personService.listCustomers();
+        List<Seller> sellers = personService.listSellers();
+        List<Product> products = productService.listAllProducts();
+        return saleService.listAllSales(customers, sellers, products);
+    }
+
     private void showSalesHistory() {
         System.out.println("\n--- HISTORIAL DE VENTAS REGISTRADAS ---");
+
+        List<Sale> sales = getAllSalesInternal();
+
         List<Customer> customers = personService.listCustomers();
         List<Seller> sellers = personService.listSellers();
         List<Product> products = productService.listAllProducts();
         List<Sale> sales = saleService.listAllSales(customers, sellers, products);
+
 
         if (sales.isEmpty()) {
             System.out.println("No se han registrado ventas todavía.");
@@ -336,14 +418,23 @@ public class ConsoleMenu {
         double price = Double.parseDouble(scanner.nextLine().trim());
         System.out.print("Stock inicial: ");
         int stock = Integer.parseInt(scanner.nextLine().trim());
+
+        System.out.print("¿Es inalámbrico? (true/false): ");
+        boolean isWireless = Boolean.parseBoolean(scanner.nextLine().trim());
+
         System.out.print("Tipo de conexión (ej. Inalámbrico, USB): ");
         String connectionType = scanner.nextLine().trim();
+
         System.out.print("Consolas compatibles (IDs separados por coma): ");
         String consoles = scanner.nextLine().trim();
         List<String> compatibleConsoles = Arrays.asList(consoles.split("\\s*,\\s*"));
 
         if (accessoryService != null) {
+
+            accessoryService.registerController(id, title, price, stock, isWireless ? "Wireless" : "Wired", compatibleConsoles);
+
             accessoryService.registerController(id, title, price, stock, connectionType, compatibleConsoles);
+
             System.out.println("¡Control registrado con éxito!");
         } else {
             System.out.println("Servicio de accesorios no disponible.");
@@ -457,6 +548,124 @@ public class ConsoleMenu {
         }
     }
 
+
+    private void showPromotionMenu() {
+        if (promotionService == null) {
+            System.out.println("Servicio de promociones no disponible.");
+            return;
+        }
+        int option = -1;
+        do {
+            System.out.println("\n--- GESTIÓN DE PROMOCIONES ---");
+            System.out.println("1. Registrar una nueva promoción de tipo porcentaje");
+            System.out.println("2. Registrar una nueva promoción de tipo categoría");
+            System.out.println("3. Registrar una nueva promoción de tipo volumen");
+            System.out.println("4. Listar todas las promociones registradas");
+            System.out.println("5. Listar solo las promociones vigentes en la fecha actual");
+            System.out.println("0. Volver al menú principal");
+            System.out.print("Seleccione una opción: ");
+
+            try {
+                option = Integer.parseInt(scanner.nextLine().trim());
+                switch (option) {
+                    case 1 -> registerPercentageDiscount();
+                    case 2 -> registerCategoryDiscount();
+                    case 3 -> registerBulkPurchaseDiscount();
+                    case 4 -> listAllPromotions();
+                    case 5 -> listActivePromotions();
+                    case 0 -> System.out.println("Volviendo al menú principal...");
+                    default -> System.out.println("Opción inválida.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Por favor ingrese un número válido.");
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        } while (option != 0);
+    }
+
+    private void registerPercentageDiscount() {
+        System.out.println("\n--- REGISTRO DE PROMOCIÓN (PORCENTAJE) ---");
+        System.out.print("ID: ");
+        String id = scanner.nextLine().trim();
+        System.out.print("Nombre: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Fecha inicio (yyyy-MM-dd): ");
+        LocalDate startDate = LocalDate.parse(scanner.nextLine().trim(), DateTimeFormatter.ISO_LOCAL_DATE);
+        System.out.print("Fecha fin (yyyy-MM-dd): ");
+        LocalDate endDate = LocalDate.parse(scanner.nextLine().trim(), DateTimeFormatter.ISO_LOCAL_DATE);
+        System.out.print("Porcentaje de descuento (0-100): ");
+        double percentage = Double.parseDouble(scanner.nextLine().trim());
+
+        promotionService.registerPercentageDiscount(id, name, startDate, endDate, percentage);
+        System.out.println("¡Promoción registrada con éxito!");
+    }
+
+    private void registerCategoryDiscount() {
+        System.out.println("\n--- REGISTRO DE PROMOCIÓN (CATEGORÍA) ---");
+        System.out.print("ID: ");
+        String id = scanner.nextLine().trim();
+        System.out.print("Nombre: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Fecha inicio (yyyy-MM-dd): ");
+        LocalDate startDate = LocalDate.parse(scanner.nextLine().trim(), DateTimeFormatter.ISO_LOCAL_DATE);
+        System.out.print("Fecha fin (yyyy-MM-dd): ");
+        LocalDate endDate = LocalDate.parse(scanner.nextLine().trim(), DateTimeFormatter.ISO_LOCAL_DATE);
+        System.out.print("Porcentaje de descuento (0-100): ");
+        double percentage = Double.parseDouble(scanner.nextLine().trim());
+        System.out.print("Categoría objetivo (VIDEOGAME/CONSOLE): ");
+        String targetCategory = scanner.nextLine().trim().toUpperCase();
+
+        promotionService.registerCategoryDiscount(id, name, startDate, endDate, percentage, targetCategory);
+        System.out.println("¡Promoción registrada con éxito!");
+    }
+
+    private void registerBulkPurchaseDiscount() {
+        System.out.println("\n--- REGISTRO DE PROMOCIÓN (VOLUMEN) ---");
+        System.out.print("ID: ");
+        String id = scanner.nextLine().trim();
+        System.out.print("Nombre: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Fecha inicio (yyyy-MM-dd): ");
+        LocalDate startDate = LocalDate.parse(scanner.nextLine().trim(), DateTimeFormatter.ISO_LOCAL_DATE);
+        System.out.print("Fecha fin (yyyy-MM-dd): ");
+        LocalDate endDate = LocalDate.parse(scanner.nextLine().trim(), DateTimeFormatter.ISO_LOCAL_DATE);
+        System.out.print("Cantidad mínima: ");
+        int minQty = Integer.parseInt(scanner.nextLine().trim());
+        System.out.print("Porcentaje de descuento (0-100): ");
+        double percentage = Double.parseDouble(scanner.nextLine().trim());
+
+        promotionService.registerBulkPurchaseDiscount(id, name, startDate, endDate, minQty, percentage);
+        System.out.println("¡Promoción registrada con éxito!");
+    }
+
+    private void listAllPromotions() {
+        System.out.println("\n--- TODAS LAS PROMOCIONES ---");
+        List<Promotion> promotions = promotionService.listAllPromotions();
+        if (promotions == null || promotions.isEmpty()) {
+            System.out.println("No hay promociones registradas.");
+            return;
+        }
+        for (Promotion p : promotions) {
+            System.out.printf("[%s] %s | Vigencia: %s a %s%n",
+                    p.getId(), p.getName(), p.getStartDate(), p.getEndDate());
+        }
+    }
+
+    private void listActivePromotions() {
+        System.out.println("\n--- PROMOCIONES VIGENTES HOY ---");
+        List<Promotion> promotions = promotionService.listActivePromotions();
+        if (promotions == null || promotions.isEmpty()) {
+            System.out.println("No hay promociones vigentes el día de hoy.");
+            return;
+        }
+        for (Promotion p : promotions) {
+            System.out.printf("[%s] %s | Vigencia: %s a %s%n",
+                    p.getId(), p.getName(), p.getStartDate(), p.getEndDate());
+        }
+    }
+
+
     /**
      * Guides the user through registering a new return transaction.
      */
@@ -464,6 +673,9 @@ public class ConsoleMenu {
         System.out.println("\n--- REGISTRAR NUEVA DEVOLUCIÓN ---");
         System.out.print("Ingrese el ID de la venta original: ");
         String saleId = scanner.nextLine().trim();
+
+
+        Sale sale = getAllSalesInternal().stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
 
 
         List<Customer> customers = personService.listCustomers();
@@ -474,6 +686,7 @@ public class ConsoleMenu {
 
         List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
         Sale sale = allSales.stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
+
 
         if (sale == null) {
             System.out.println("Error: No se encontró ninguna venta con el ID '" + saleId + "'.");
@@ -625,6 +838,9 @@ public class ConsoleMenu {
 
             // Calculate components for detailed display
 
+            double totalSales = getAllSalesInternal().stream()
+
+
             List<Customer> customers = personService.listCustomers();
             List<Seller> sellers = personService.listSellers();
             List<Product> products = productService.listAllProducts();
@@ -633,6 +849,7 @@ public class ConsoleMenu {
 
             List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
             double totalSales = allSales.stream()
+
 
                     .filter(s -> s.getDate().getYear() == year && s.getDate().getMonthValue() == month)
                     .mapToDouble(Sale::calculateTotal)
@@ -645,11 +862,19 @@ public class ConsoleMenu {
 
             System.out.println("     Balance Financiero");
             
+
+            System.out.println("     Balance Financiero");
+
+
             System.out.printf("  (+) Total Ventas del Mes:       $%.2f%n", totalSales);
             System.out.printf("  (-) Total Devoluciones del Mes: $%.2f%n", totalReturns);
             System.out.println("-----------------------------------------");
             System.out.printf("  (=) BALANCE NETO:               $%.2f%n", netBalance);
+
+            System.out.println("");
+
             System.out.println();
+
         } catch (NumberFormatException e) {
             System.out.println("Error: Ingrese valores numéricos válidos para mes y año.");
         } catch (Exception e) {
