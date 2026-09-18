@@ -60,7 +60,7 @@ public class Return {
         return total;
     }
 
-    public String generateReturnReceipt(){
+  
 
     public String generateReturnReceipt() {
 
