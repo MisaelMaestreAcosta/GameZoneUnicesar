@@ -369,4 +369,8 @@ classDiagram
     Main --> ProductService
     Main --> WarrantyService
     Main --> SaleService
+<<<<<<< HEAD
 ```
+=======
+```
+>>>>>>> origin/develop

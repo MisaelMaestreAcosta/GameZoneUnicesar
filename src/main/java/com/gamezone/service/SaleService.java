@@ -24,13 +24,26 @@ public class SaleService {
 
     private final SaleRepository saleRepository;
     private final ProductService productService;
+
+    private WarrantyService warrantyService;
+
     private AccessoryService accessoryService;
 
     private PromotionService promotionService;
 
-    public SaleService(SaleRepository saleRepository, ProductService productService) {
+
+    public SaleService(SaleRepository saleRepository, ProductService productService, WarrantyService warrantyService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
+        this.warrantyService = warrantyService;
+    }
+
+    public void setWarrantyService(WarrantyService warrantyService) {
+        this.warrantyService = warrantyService;
+    }
+
+    public Sale findById(String id) {
+        return null; // Stub to satisfy compilation. Real implementation requires PersonService.
     }
 
 
@@ -61,8 +74,9 @@ public class SaleService {
      * Validates business invariants, verifies stock, decrements inventory, and commits persistence.
      *
      * @param sale The sale transaction to complete
+     * @param productIdsWithExtendedWarranty List of product IDs that should receive an extended warranty
      */
-    public void processSale(Sale sale) {
+    public void registerSale(Sale sale, List<String> productIdsWithExtendedWarranty) {
         sale.validateSale();
 
         // 1. Verify stock availability for all items before applying changes
@@ -86,11 +100,29 @@ public class SaleService {
 
         // 2. Decrement inventory through ProductService or AccessoryService
         for (SalesLineItem item : sale.getItems()) {
+
+            productService.updateStock(item.getProduct().getId(), -item.getQuantity());
+            
+            // Assign warranties
+            Product product = item.getProduct();
+            if (product instanceof com.gamezone.model.Console) {
+                if (warrantyService != null) {
+                    warrantyService.assignBasicWarranty(product, sale, sale.getDate().toLocalDate());
+                }
+            }
+            if (productIdsWithExtendedWarranty != null && productIdsWithExtendedWarranty.contains(product.getId())) {
+                if (warrantyService != null) {
+                    com.gamezone.model.ExtendedWarranty ew = warrantyService.assignExtendedWarranty(product, sale, sale.getDate().toLocalDate());
+                    sale.addWarrantyCost(ew.getAdditionalCost());
+                }
+            }
+
             if (item.getProduct() instanceof Accessory && accessoryService != null) {
                 accessoryService.updateStock(item.getProduct().getId(), -item.getQuantity());
             } else {
                 productService.updateStock(item.getProduct().getId(), -item.getQuantity());
             }
+
 
         }
 
