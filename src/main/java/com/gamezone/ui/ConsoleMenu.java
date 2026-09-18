@@ -234,9 +234,16 @@ public class ConsoleMenu {
         System.out.println(sale);
     }
 
+    private List<Sale> getAllSalesInternal() {
+        List<Customer> customers = personService.listCustomers();
+        List<Seller> sellers = personService.listSellers();
+        List<Product> products = productService.listAllProducts();
+        return saleService.listAllSales(customers, sellers, products);
+    }
+
     private void showSalesHistory() {
         System.out.println("\n--- HISTORIAL DE VENTAS REGISTRADAS ---");
-        List<Sale> sales = saleService.getAllSales();
+        List<Sale> sales = getAllSalesInternal();
         if (sales.isEmpty()) {
             // Fallback if personService wasn't linked inside SaleService
             List<Customer> customers = personService.listCustomers();
@@ -361,7 +368,7 @@ public class ConsoleMenu {
         System.out.print("Ingrese el ID de la venta original: ");
         String saleId = scanner.nextLine().trim();
 
-        Sale sale = saleService.findSaleById(saleId);
+        Sale sale = getAllSalesInternal().stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
         if (sale == null) {
             System.out.println("Error: No se encontró ninguna venta con el ID '" + saleId + "'.");
             return;
@@ -502,14 +509,14 @@ public class ConsoleMenu {
             double netBalance = returnService.generateMonthlyBalance(month, year);
 
             // Calculate components for detailed display
-            double totalSales = saleService.getAllSales().stream()
+            double totalSales = getAllSalesInternal().stream()
                     .filter(s -> s.getDate().getYear() == year && s.getDate().getMonthValue() == month)
                     .mapToDouble(Sale::calculateTotal)
                     .sum();
 
             double totalReturns = returnService.viewAllReturns().stream()
-                    .filter(r -> r.getReturnDate().getYear() == year && r.getReturnDate().getMonthValue() == month)
-                    .mapToDouble(Return::getRefundAmount)
+                    .filter(r -> r.getDateReturn().getYear() == year && r.getDateReturn().getMonthValue() == month)
+                    .mapToDouble(Return::getRefund)
                     .sum();
 
             

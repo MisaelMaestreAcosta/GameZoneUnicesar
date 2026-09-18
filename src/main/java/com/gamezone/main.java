@@ -17,13 +17,17 @@ public class main {
         ProductRepository productRepo = new ProductRepository();
         PersonRepository personRepo = new PersonRepository();
         SaleRepository saleRepo = new SaleRepository();
-        WarrantyRepository warrantyRepo = new WarrantyRepository();
 
         // 2. Inyección de Dependencias en Servicios (Lógica de Negocio)
         ProductService productService = new ProductService(productRepo);
         PersonService personService = new PersonService(personRepo);
+        
+        SaleService saleService = new SaleService(saleRepo, productService, null);
+        
+        WarrantyRepository warrantyRepo = new WarrantyRepository(saleService, productService);
         WarrantyService warrantyService = new WarrantyService(warrantyRepo);
-        SaleService saleService = new SaleService(saleRepo, productService, warrantyService);
+        
+        saleService.setWarrantyService(warrantyService);
 
         // 3. Inicio de la Capa de Presentación (UI)
         ConsoleMenu menu = new ConsoleMenu(productService, personService, saleService, null, warrantyService);

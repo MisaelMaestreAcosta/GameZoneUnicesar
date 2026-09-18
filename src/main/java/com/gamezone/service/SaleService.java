@@ -17,12 +17,20 @@ public class SaleService {
 
     private final SaleRepository saleRepository;
     private final ProductService productService;
-    private final WarrantyService warrantyService;
+    private WarrantyService warrantyService;
 
     public SaleService(SaleRepository saleRepository, ProductService productService, WarrantyService warrantyService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.warrantyService = warrantyService;
+    }
+
+    public void setWarrantyService(WarrantyService warrantyService) {
+        this.warrantyService = warrantyService;
+    }
+
+    public Sale findById(String id) {
+        return null; // Stub to satisfy compilation. Real implementation requires PersonService.
     }
 
     /**

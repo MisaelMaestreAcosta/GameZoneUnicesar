@@ -59,7 +59,7 @@ public class Return {
         this.refund = total;
         return total;
     }
-    public String generateReturnReceip(String returnid, LocalDate datereturn, Sale originalSale, List<Product> listOfRetornedProduct, String reasonReturn, double refund){
+    public String generateReturnReceipt(){
          return String.format(
             "========================================%n" +
             "           RECIBO DE DEVOLUCIÓN        %n" +
