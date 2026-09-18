@@ -6,6 +6,10 @@ import com.gamezone.model.Sale;
 import com.gamezone.model.SalesLineItem;
 import com.gamezone.model.Seller;
 import com.gamezone.persistence.SaleRepository;
+import com.gamezone.model.Accessory;
+import com.gamezone.service.AccessoryService;
+import com.gamezone.model.Promotion;
+import com.gamezone.service.PromotionService;
 
 import java.util.List;
 
@@ -17,10 +21,31 @@ public class SaleService {
 
     private final SaleRepository saleRepository;
     private final ProductService productService;
+    private AccessoryService accessoryService;
+    private PromotionService promotionService;
 
     public SaleService(SaleRepository saleRepository, ProductService productService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
+    }
+
+    public SaleService(SaleRepository saleRepository, ProductService productService, PromotionService promotionService) {
+        this.saleRepository = saleRepository;
+        this.productService = productService;
+        this.promotionService = promotionService;
+    }
+
+    public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService) {
+        this.saleRepository = saleRepository;
+        this.productService = productService;
+        this.accessoryService = accessoryService;
+    }
+
+    public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService, PromotionService promotionService) {
+        this.saleRepository = saleRepository;
+        this.productService = productService;
+        this.accessoryService = accessoryService;
+        this.promotionService = promotionService;
     }
 
     /**
@@ -34,7 +59,12 @@ public class SaleService {
 
         // 1. Verify stock availability for all items before applying changes
         for (SalesLineItem item : sale.getItems()) {
-            Product currentProduct = productService.findById(item.getProduct().getId());
+            Product currentProduct = null;
+            if (item.getProduct() instanceof Accessory && accessoryService != null) {
+                currentProduct = accessoryService.findById(item.getProduct().getId());
+            } else {
+                currentProduct = productService.findById(item.getProduct().getId());
+            }
             if (currentProduct == null) {
                 throw new IllegalStateException("Product not found: " + item.getProduct().getTitle());
             }
@@ -46,12 +76,28 @@ public class SaleService {
             }
         }
 
-        // 2. Decrement inventory through ProductService
+        // 2. Decrement inventory through ProductService or AccessoryService
         for (SalesLineItem item : sale.getItems()) {
-            productService.updateStock(item.getProduct().getId(), -item.getQuantity());
+            if (item.getProduct() instanceof Accessory && accessoryService != null) {
+                accessoryService.updateStock(item.getProduct().getId(), -item.getQuantity());
+            } else {
+                productService.updateStock(item.getProduct().getId(), -item.getQuantity());
+            }
         }
 
-        // 3. Persist transaction in sales.txt
+        // 3. Apply promotions
+        if (promotionService != null) {
+            Promotion bestPromotion = promotionService.findBestPromotionFor(sale);
+            if (bestPromotion != null) {
+                double discount = bestPromotion.calculateDiscount(sale);
+                if (discount > 0) {
+                    sale.setAppliedPromotionName(bestPromotion.getName());
+                    sale.setDiscountAmount(discount);
+                }
+            }
+        }
+
+        // 4. Persist transaction in sales.txt
         saleRepository.save(sale);
     }
 
