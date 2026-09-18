@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.UUID;
 import java.time.LocalDate;
@@ -48,7 +49,11 @@ public class ConsoleMenu {
     private final Scanner scanner;
 
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService) {
-        this(productService, personService, saleService, null);
+        this.productService = productService;
+        this.personService = personService;
+        this.saleService = saleService;
+        this.returnService = null;
+        this.scanner = new Scanner(System.in);
     }
 
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, ReturnService returnService) {
@@ -64,6 +69,7 @@ public class ConsoleMenu {
         this.personService = personService;
         this.saleService = saleService;
         this.promotionService = promotionService;
+        this.returnService = null;
         this.scanner = new Scanner(System.in);
     }
 
@@ -72,6 +78,7 @@ public class ConsoleMenu {
         this.personService = personService;
         this.saleService = saleService;
         this.accessoryService = accessoryService;
+        this.returnService = null;
         this.scanner = new Scanner(System.in);
     }
 
@@ -81,6 +88,7 @@ public class ConsoleMenu {
         this.saleService = saleService;
         this.accessoryService = accessoryService;
         this.promotionService = promotionService;
+        this.returnService = null;
         this.scanner = new Scanner(System.in);
     }
 
@@ -99,9 +107,8 @@ public class ConsoleMenu {
 
             System.out.println("7. Gestión de Accesorios");
             System.out.println("8. Gestión de Promociones");
-
-            System.out.println("7. Gestión de Devoluciones");
-            System.out.println("8. Consultar Balance Mensual");
+            System.out.println("9. Gestión de Devoluciones");
+            System.out.println("10. Consultar Balance Mensual");
 
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
@@ -118,9 +125,8 @@ public class ConsoleMenu {
 
                     case 7 -> showAccessoryMenu();
                     case 8 -> showPromotionMenu();
-
-                    case 7 -> handleReturnsMenu();
-                    case 8 -> showMonthlyBalance();
+                    case 9 -> handleReturnsMenu();
+                    case 10 -> showMonthlyBalance();
                            
                     case 0 -> System.out.println("Saliendo del sistema... ¡Hasta luego!");
                     default -> System.out.println("Opción inválida. Intente de nuevo.");
@@ -272,16 +278,16 @@ public class ConsoleMenu {
         System.out.println(sale);
     }
 
+    private List<Sale> getAllSalesInternal() {
+        List<Customer> customers = personService.listCustomers();
+        List<Seller> sellers = personService.listSellers();
+        List<Product> products = productService.listAllProducts();
+        return saleService.listAllSales(customers, sellers, products);
+    }
+
     private void showSalesHistory() {
         System.out.println("\n--- HISTORIAL DE VENTAS REGISTRADAS ---");
-        List<Sale> sales = saleService.getAllSales();
-        if (sales.isEmpty()) {
-            // Fallback if personService wasn't linked inside SaleService
-            List<Customer> customers = personService.listCustomers();
-            List<Seller> sellers = personService.listSellers();
-            List<Product> products = productService.listAllProducts();
-            sales = saleService.listAllSales(customers, sellers, products);
-        }
+        List<Sale> sales = getAllSalesInternal();
 
         if (sales.isEmpty()) {
             System.out.println("No se han registrado ventas todavía.");
@@ -303,6 +309,28 @@ public class ConsoleMenu {
             System.out.println("4. Listar todos los accesorios");
             System.out.println("5. Listar accesorios por tipo");
             System.out.println("6. Consultar accesorios compatibles con una consola");
+            System.out.println("0. Volver al menú principal");
+            System.out.print("Seleccione una opción: ");
+
+            try {
+                option = Integer.parseInt(scanner.nextLine().trim());
+                switch (option) {
+                    case 1 -> registerController();
+                    case 2 -> registerCable();
+                    case 3 -> registerMemory();
+                    case 4 -> listAllAccessories();
+                    case 5 -> listAccessoriesByType();
+                    case 6 -> listCompatibleAccessories();
+                    case 0 -> System.out.println("Volviendo al menú principal...");
+                    default -> System.out.println("Opción inválida.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Por favor ingrese un número válido.");
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        } while (option != 0);
+    }
 
     /**
      * Submenu for product return management operations.
@@ -323,23 +351,10 @@ public class ConsoleMenu {
             System.out.println("3. Consultar devoluciones por cliente");
             System.out.println("4. Consultar devoluciones por venta");
             System.out.println("5. Consultar el balance mensual");
-
             System.out.println("0. Volver al menú principal");
             System.out.print("Seleccione una opción: ");
 
             try {
-
-                option = Integer.parseInt(scanner.nextLine().trim());
-                switch (option) {
-                    case 1 -> registerController();
-                    case 2 -> registerCable();
-                    case 3 -> registerMemory();
-                    case 4 -> listAllAccessories();
-                    case 5 -> listAccessoriesByType();
-                    case 6 -> listCompatibleAccessories();
-                    case 0 -> System.out.println("Volviendo al menú principal...");
-                    default -> System.out.println("Opción inválida.");
-
                 subOption = Integer.parseInt(scanner.nextLine().trim());
                 switch (subOption) {
                     case 1 -> processNewReturn();
@@ -349,7 +364,6 @@ public class ConsoleMenu {
                     case 5 -> showMonthlyBalance();
                     case 0 -> System.out.println("Regresando al menú principal...");
                     default -> System.out.println("Opción inválida. Intente de nuevo.");
-
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Error: Por favor ingrese un número válido.");
@@ -357,7 +371,7 @@ public class ConsoleMenu {
                 System.out.println("Error: " + e.getMessage());
             }
 
-        } while (option != 0);
+        } while (subOption != 0);
     }
 
     private void registerController() {
@@ -377,7 +391,7 @@ public class ConsoleMenu {
         List<String> compatibleConsoles = Arrays.asList(consoles.split("\\s*,\\s*"));
 
         if (accessoryService != null) {
-            accessoryService.registerController(id, title, price, stock, isWireless, compatibleConsoles);
+            accessoryService.registerController(id, title, price, stock, isWireless ? "Wireless" : "Wired", compatibleConsoles);
             System.out.println("¡Control registrado con éxito!");
         } else {
             System.out.println("Servicio de accesorios no disponible.");
@@ -480,7 +494,7 @@ public class ConsoleMenu {
         System.out.print("Ingrese el ID de la consola: ");
         String consoleId = scanner.nextLine().trim();
         System.out.println("\n--- ACCESORIOS COMPATIBLES CON: " + consoleId + " ---");
-        List<Accessory> accessories = accessoryService.listCompatibleAccessories(consoleId);
+        List<Accessory> accessories = accessoryService.findAccessoriesCompatibleWith(consoleId);
         if (accessories == null || accessories.isEmpty()) {
             System.out.println("No se encontraron accesorios compatibles.");
             return;
@@ -604,8 +618,7 @@ public class ConsoleMenu {
         for (Promotion p : promotions) {
             System.out.printf("[%s] %s | Vigencia: %s a %s%n",
                     p.getId(), p.getName(), p.getStartDate(), p.getEndDate());
-
-        } while (subOption != 0);
+        }
     }
 
     /**
@@ -616,7 +629,7 @@ public class ConsoleMenu {
         System.out.print("Ingrese el ID de la venta original: ");
         String saleId = scanner.nextLine().trim();
 
-        Sale sale = saleService.findSaleById(saleId);
+        Sale sale = getAllSalesInternal().stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
         if (sale == null) {
             System.out.println("Error: No se encontró ninguna venta con el ID '" + saleId + "'.");
             return;
@@ -757,7 +770,7 @@ public class ConsoleMenu {
             double netBalance = returnService.generateMonthlyBalance(month, year);
 
             // Calculate components for detailed display
-            double totalSales = saleService.getAllSales().stream()
+            double totalSales = getAllSalesInternal().stream()
                     .filter(s -> s.getDate().getYear() == year && s.getDate().getMonthValue() == month)
                     .mapToDouble(Sale::calculateTotal)
                     .sum();
@@ -768,12 +781,11 @@ public class ConsoleMenu {
                     .sum();
 
             
-            System.out.printf("     Balance Financiero" );
-            
-            System.out.printf("  (+) Total Ventas del Mes:       ", totalSales);
-            System.out.printf("  (-) Total Devoluciones del Mes: ", totalReturns);
+            System.out.println("     Balance Financiero");
+            System.out.printf("  (+) Total Ventas del Mes:       $%.2f%n", totalSales);
+            System.out.printf("  (-) Total Devoluciones del Mes: $%.2f%n", totalReturns);
             System.out.println("-----------------------------------------");
-            System.out.printf("  (=) BALANCE NETO:               ", netBalance);
+            System.out.printf("  (=) BALANCE NETO:               $%.2f%n", netBalance);
             System.out.println("");
         } catch (NumberFormatException e) {
             System.out.println("Error: Ingrese valores numéricos válidos para mes y año.");

@@ -24,28 +24,19 @@ public class AccessoryService {
     }
 
     public void registerController(String id, String title, double price, int quantity, String connectionType, List<String> compatibleConsoles) {
-        Controller controller = new Controller(id, title, price, quantity, connectionType);
-        if (compatibleConsoles != null) {
-            controller.setCompatibleConsoles(compatibleConsoles);
-        }
+        Controller controller = new Controller(id, title, price, quantity, compatibleConsoles != null ? compatibleConsoles : new ArrayList<>(), connectionType);
         accessories.add(controller);
         repository.saveAll(accessories);
     }
 
     public void registerCable(String id, String title, double price, int quantity, double lengthInMeters, String connectorType, List<String> compatibleConsoles) {
-        Cable cable = new Cable(id, title, price, quantity, lengthInMeters, connectorType);
-        if (compatibleConsoles != null) {
-            cable.setCompatibleConsoles(compatibleConsoles);
-        }
+        Cable cable = new Cable(id, title, price, quantity, compatibleConsoles != null ? compatibleConsoles : new ArrayList<>(), lengthInMeters, connectorType);
         accessories.add(cable);
         repository.saveAll(accessories);
     }
 
     public void registerMemory(String id, String title, double price, int quantity, int capacityInGb, String memoryType, List<String> compatibleConsoles) {
-        Memory memory = new Memory(id, title, price, quantity, capacityInGb, memoryType);
-        if (compatibleConsoles != null) {
-            memory.setCompatibleConsoles(compatibleConsoles);
-        }
+        Memory memory = new Memory(id, title, price, quantity, compatibleConsoles != null ? compatibleConsoles : new ArrayList<>(), capacityInGb, memoryType);
         accessories.add(memory);
         repository.saveAll(accessories);
     }
@@ -62,7 +53,7 @@ public class AccessoryService {
 
     public List<Accessory> findAccessoriesCompatibleWith(String consoleId) {
         return accessories.stream()
-                .filter(a -> a.getCompatibleConsoles().contains(consoleId))
+                .filter(a -> a.getCompatibleConsoleIds().contains(consoleId))
                 .collect(Collectors.toList());
     }
 

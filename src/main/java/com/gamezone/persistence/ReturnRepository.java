@@ -116,11 +116,11 @@ public class ReturnRepository {
 
         return String.join(FIELD_DELIMITER,
                 ret.getReturnid(),
-                ret.getDateReturn().toString(),
+                ret.getReturnDate().toString(),
                 ret.getOriginalSale().getId(),
                 productIds.toString(),
                 ret.getReasonReturn(),
-                String.valueOf(ret.getRefund()));
+                String.valueOf(ret.getRefundAmount()));
     }
 
     private Return fromTextLine(String line, List<Sale> allSales) {

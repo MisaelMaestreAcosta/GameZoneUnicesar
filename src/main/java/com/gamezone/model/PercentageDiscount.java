@@ -41,7 +41,7 @@ public class PercentageDiscount extends Promotion {
     
     @Override
     public double calculateDiscount(Sale sale) {
-        return sale.getTotalAmount() * (discountPercentage / 100.0);
+        return sale.calculateTotal() * (discountPercentage / 100.0);
     }
     
 }

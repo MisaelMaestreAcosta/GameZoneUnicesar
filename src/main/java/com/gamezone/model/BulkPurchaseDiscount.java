@@ -56,7 +56,7 @@ public class BulkPurchaseDiscount extends Promotion {
         }
 
         if (totalItems >= minimumQuantity) {
-            return sale.getTotalAmount() * (discountPercentage / 100.0);
+            return sale.calculateTotal() * (discountPercentage / 100.0);
         }
         return 0.0;
     }

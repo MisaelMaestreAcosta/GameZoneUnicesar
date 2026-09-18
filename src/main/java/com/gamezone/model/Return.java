@@ -29,7 +29,7 @@ public class Return {
         return returnid;
     }
 
-    public LocalDate getDateReturn() {
+    public LocalDate getReturnDate() {
         return dateReturn;
     }
 
@@ -37,7 +37,7 @@ public class Return {
         return reasonReturn;
     }
 
-    public double getRefund() {
+    public double getRefundAmount() {
         return refund;
     }
 
@@ -59,7 +59,7 @@ public class Return {
         this.refund = total;
         return total;
     }
-    public String generateReturnReceip(String returnid, LocalDate datereturn, Sale originalSale, List<Product> listOfRetornedProduct, String reasonReturn, double refund){
+    public String generateReturnReceipt(){
          return String.format(
             "========================================%n" +
             "           RECIBO DE DEVOLUCIÓN        %n" +

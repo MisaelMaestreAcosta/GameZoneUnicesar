@@ -70,6 +70,10 @@ public class Sale {
         }
     }
 
+    public boolean canBeReturned() {
+        return true;
+    }
+
     public String getId() {
         return id;
     }

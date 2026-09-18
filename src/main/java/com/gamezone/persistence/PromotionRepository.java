@@ -70,7 +70,7 @@ public class PromotionRepository {
                     pd.getName(),
                     pd.getStartDate().toString(),
                     pd.getEndDate().toString(),
-                    String.valueOf(pd.getPercentage()));
+                    String.valueOf(pd.getDiscountPercentage()));
         } else if (promotion instanceof CategoryDiscount cd) {
             return String.join(FIELD_DELIMITER,
                     "CATEGORY",
@@ -78,7 +78,7 @@ public class PromotionRepository {
                     cd.getName(),
                     cd.getStartDate().toString(),
                     cd.getEndDate().toString(),
-                    String.valueOf(cd.getPercentage()),
+                    String.valueOf(cd.getDiscountPercentage()),
                     cd.getTargetCategory());
         } else if (promotion instanceof BulkPurchaseDiscount bd) {
             return String.join(FIELD_DELIMITER,
@@ -87,8 +87,8 @@ public class PromotionRepository {
                     bd.getName(),
                     bd.getStartDate().toString(),
                     bd.getEndDate().toString(),
-                    String.valueOf(bd.getPercentage()),
-                    String.valueOf(bd.getMinQuantity()));
+                    String.valueOf(bd.getDiscountPercentage()),
+                    String.valueOf(bd.getMinimumQuantity()));
         }
         throw new IllegalArgumentException("Tipo de promoción desconocido.");
     }
