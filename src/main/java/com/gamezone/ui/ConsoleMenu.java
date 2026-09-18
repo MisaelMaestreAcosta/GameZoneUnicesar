@@ -13,10 +13,10 @@ import com.gamezone.service.ProductService;
 import com.gamezone.service.ReturnService;
 
 import com.gamezone.service.SaleService;
-<<<<<<< HEAD
+
 import com.gamezone.service.WarrantyService;
 import com.gamezone.model.Warranty;
-=======
+
 import com.gamezone.model.Promotion;
 import com.gamezone.service.PromotionService;
 
@@ -31,7 +31,7 @@ import com.gamezone.model.Accessory;
 import com.gamezone.service.AccessoryService;
 
 import java.util.Arrays;
->>>>>>> origin/develop
+
 
 import java.util.ArrayList;
 
@@ -57,7 +57,7 @@ public class ConsoleMenu {
     private PromotionService promotionService;
 
     private final ReturnService returnService;
-<<<<<<< HEAD
+
     private final WarrantyService warrantyService;
     private final Scanner scanner;
 
@@ -70,24 +70,18 @@ public class ConsoleMenu {
     }
 
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, ReturnService returnService, WarrantyService warrantyService) {
-=======
+
 
     private final Scanner scanner;
 
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService) {
->>>>>>> origin/develop
+
         this.productService = productService;
         this.personService = personService;
         this.saleService = saleService;
         this.returnService = null;
         this.scanner = new Scanner(System.in);
     }
-
-
-    private final ReturnService returnService;
-
-    private final Scanner scanner;
-
 
     public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, AccessoryService accessoryService, ReturnService returnService) {
         this.productService = productService;
@@ -139,11 +133,11 @@ public class ConsoleMenu {
             System.out.println("4. Listar Clientes y Vendedores");
             System.out.println("5. Registrar una Venta");
             System.out.println("6. Ver Historial de Ventas");
-<<<<<<< HEAD
+
             System.out.println("7. Gestión de Devoluciones");
             System.out.println("8. Consultar Balance Mensual");
             System.out.println("9. Gestión de Garantías");
-=======
+
 
             System.out.println("7. Gestión de Accesorios");
 
@@ -152,10 +146,10 @@ public class ConsoleMenu {
             System.out.println("10. Consultar Balance Mensual");
 
 
+
             System.out.println("8. Gestión de Devoluciones");
             System.out.println("9. Consultar Balance Mensual");
 
->>>>>>> origin/develop
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
 
@@ -168,24 +162,19 @@ public class ConsoleMenu {
                     case 4 -> showPersons();
                     case 5 -> processNewSale();
                     case 6 -> showSalesHistory();
-<<<<<<< HEAD
+
                     case 7 -> handleReturnsMenu();
                     case 8 -> showMonthlyBalance();
                     case 9 -> showWarrantyMenu();
-=======
+
 
                     case 7 -> showAccessoryMenu();
 
                     case 8 -> showPromotionMenu();
                     case 9 -> handleReturnsMenu();
                     case 10 -> showMonthlyBalance();
-                           
-
-                    case 8 -> handleReturnsMenu();
-                    case 9 -> showMonthlyBalance();
 
 
->>>>>>> origin/develop
                     case 0 -> System.out.println("Saliendo del sistema... ¡Hasta luego!");
                     default -> System.out.println("Opción inválida. Intente de nuevo.");
                 }
@@ -353,7 +342,7 @@ public class ConsoleMenu {
 
     private void showSalesHistory() {
         System.out.println("\n--- HISTORIAL DE VENTAS REGISTRADAS ---");
-<<<<<<< HEAD
+
         List<Sale> sales = getAllSalesInternal();
         if (sales.isEmpty()) {
             // Fallback if personService wasn't linked inside SaleService
@@ -362,16 +351,15 @@ public class ConsoleMenu {
             List<Product> products = productService.listAllProducts();
             sales = saleService.listAllSales(customers, sellers, products);
         }
-=======
 
-        List<Sale> sales = getAllSalesInternal();
 
         List<Customer> customers = personService.listCustomers();
         List<Seller> sellers = personService.listSellers();
         List<Product> products = productService.listAllProducts();
         List<Sale> sales = saleService.listAllSales(customers, sellers, products);
 
->>>>>>> origin/develop
+
+
 
         if (sales.isEmpty()) {
             System.out.println("No se han registrado ventas todavía.");
@@ -382,7 +370,7 @@ public class ConsoleMenu {
         }
     }
 
-<<<<<<< HEAD
+
     private void showWarrantyMenu() {
         if (warrantyService == null) {
             System.out.println("Servicio de garantías no disponible.");
@@ -395,7 +383,7 @@ public class ConsoleMenu {
             System.out.println("2. Listar todas las garantías registradas");
             System.out.println("3. Listar garantías vigentes hoy");
             System.out.println("4. Listar garantías próximas a vencer");
-=======
+
 
     private void showAccessoryMenu() {
         int option = -1;
@@ -407,14 +395,14 @@ public class ConsoleMenu {
             System.out.println("4. Listar todos los accesorios");
             System.out.println("5. Listar accesorios por tipo");
             System.out.println("6. Consultar accesorios compatibles con una consola");
->>>>>>> origin/develop
+
             System.out.println("0. Volver al menú principal");
             System.out.print("Seleccione una opción: ");
 
             try {
                 option = Integer.parseInt(scanner.nextLine().trim());
                 switch (option) {
-<<<<<<< HEAD
+
                     case 1 -> {
                         System.out.print("Ingrese ID del Producto: ");
                         String prodId = scanner.nextLine().trim();
@@ -444,14 +432,14 @@ public class ConsoleMenu {
                         if (expiring.isEmpty()) System.out.println("No hay garantías próximas a vencer en ese plazo.");
                         else expiring.forEach(w -> System.out.println(w.generateWarrantyCertificate()));
                     }
-=======
+
                     case 1 -> registerController();
                     case 2 -> registerCable();
                     case 3 -> registerMemory();
                     case 4 -> listAllAccessories();
                     case 5 -> listAccessoriesByType();
                     case 6 -> listCompatibleAccessories();
->>>>>>> origin/develop
+
                     case 0 -> System.out.println("Volviendo al menú principal...");
                     default -> System.out.println("Opción inválida.");
                 }
@@ -460,10 +448,7 @@ public class ConsoleMenu {
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
             }
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/develop
         } while (option != 0);
     }
 
@@ -776,24 +761,16 @@ public class ConsoleMenu {
         System.out.print("Ingrese el ID de la venta original: ");
         String saleId = scanner.nextLine().trim();
 
-<<<<<<< HEAD
-        Sale sale = getAllSalesInternal().stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
-=======
 
         Sale sale = getAllSalesInternal().stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
 
-
-        List<Customer> customers = personService.listCustomers();
-        List<Seller> sellers = personService.listSellers();
-        List<Product> products = productService.listAllProducts();
-        List<Sale> sales = saleService.listAllSales(customers, sellers, products);
-        Sale sale = sales.stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
 
         List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
         Sale sale = allSales.stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
 
 
->>>>>>> origin/develop
+
+
         if (sale == null) {
             System.out.println("Error: No se encontró ninguna venta con el ID '" + saleId + "'.");
             return;
@@ -862,7 +839,7 @@ public class ConsoleMenu {
         try {
             Return processedReturn = returnService.registerReturn(saleId, productIdsToReturn, reason);
             System.out.println("\n¡Devolución registrada exitosamente!");
-            System.out.println(processedReturn.generateReturnReceip(processedReturn.getReturnid(), processedReturn.getDateReturn(), processedReturn.getOriginalSale(), processedReturn.getListOfRetornedProduct(), processedReturn.getReasonReturn(), processedReturn.getRefund()));
+            System.out.println(processedReturn.generateReturnReceipt());
         } catch (IllegalArgumentException e) {
             System.out.println("Error al procesar la devolución: " + e.getMessage());
         }
@@ -879,7 +856,7 @@ public class ConsoleMenu {
             return;
         }
         for (Return r : returns) {
-            System.out.println(r.generateReturnReceip(r.getReturnid(), r.getDateReturn(), r.getOriginalSale(), r.getListOfRetornedProduct(), r.getReasonReturn(), r.getRefund()));
+            System.out.println(r.generateReturnReceipt());
             System.out.println();
         }
     }
@@ -899,7 +876,7 @@ public class ConsoleMenu {
         }
         System.out.printf("Se encontraron %d devolución(es) para el cliente:%n", returns.size());
         for (Return r : returns) {
-            System.out.println(r.generateReturnReceip(r.getReturnid(), r.getDateReturn(), r.getOriginalSale(), r.getListOfRetornedProduct(), r.getReasonReturn(), r.getRefund()));
+            System.out.println(r.generateReturnReceipt());
             System.out.println();
         }
     }
@@ -919,7 +896,7 @@ public class ConsoleMenu {
         }
         System.out.printf("Se encontraron %d devolución(es) para la venta:%n", returns.size());
         for (Return r : returns) {
-            System.out.println(r.generateReturnReceip(r.getReturnid(), r.getDateReturn(), r.getOriginalSale(), r.getListOfRetornedProduct(), r.getReasonReturn(), r.getRefund()));
+            System.out.println(r.generateReturnReceipt());
             System.out.println();
         }
     }
@@ -943,38 +920,25 @@ public class ConsoleMenu {
             double netBalance = returnService.generateMonthlyBalance(month, year);
 
             // Calculate components for detailed display
-<<<<<<< HEAD
-            double totalSales = getAllSalesInternal().stream()
-=======
 
             double totalSales = getAllSalesInternal().stream()
 
-
-            List<Customer> customers = personService.listCustomers();
-            List<Seller> sellers = personService.listSellers();
-            List<Product> products = productService.listAllProducts();
-            
-            double totalSales = saleService.listAllSales(customers, sellers, products).stream()
 
             List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
             double totalSales = allSales.stream()
 
 
->>>>>>> origin/develop
+
                     .filter(s -> s.getDate().getYear() == year && s.getDate().getMonthValue() == month)
                     .mapToDouble(Sale::calculateTotal)
                     .sum();
 
             double totalReturns = returnService.viewAllReturns().stream()
-                    .filter(r -> r.getDateReturn().getYear() == year && r.getDateReturn().getMonthValue() == month)
-                    .mapToDouble(Return::getRefund)
+                    .filter(r -> r.getReturnDate().getYear() == year && r.getReturnDate().getMonthValue() == month)
+                    .mapToDouble(Return::getRefundAmount)
                     .sum();
 
             System.out.println("     Balance Financiero");
-            
-
-            System.out.println("     Balance Financiero");
-
 
             System.out.printf("  (+) Total Ventas del Mes:       $%.2f%n", totalSales);
             System.out.printf("  (-) Total Devoluciones del Mes: $%.2f%n", totalReturns);
