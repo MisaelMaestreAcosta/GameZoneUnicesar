@@ -18,8 +18,12 @@ public class Sale {
     private Customer customer;
     private Seller seller;
     private final List<SalesLineItem> items;
+
+    private double warrantyCost;
+
     private String appliedPromotionName;
     private double discountAmount;
+
 
     public Sale(String id, Customer customer, Seller seller) {
         if (customer == null) {
@@ -33,6 +37,7 @@ public class Sale {
         this.customer = customer;
         this.seller = seller;
         this.items = new ArrayList<>();
+        this.warrantyCost = 0.0;
     }
 
     /**
@@ -58,7 +63,7 @@ public class Sale {
         for (SalesLineItem item : items) {
             total += item.calculateSubtotal();
         }
-        return total;
+        return total + warrantyCost;
     }
 
     /**
@@ -116,9 +121,15 @@ public class Sale {
         return Collections.unmodifiableList(items);
     }
 
-    public String getAppliedPromotionName() {
-        return appliedPromotionName;
+
+    public double getWarrantyCost() {
+        return warrantyCost;
     }
+
+    public void addWarrantyCost(double cost) {
+        this.warrantyCost += cost;
+
+   
 
     public void setAppliedPromotionName(String appliedPromotionName) {
         this.appliedPromotionName = appliedPromotionName;
@@ -130,6 +141,7 @@ public class Sale {
 
     public void setDiscountAmount(double discountAmount) {
         this.discountAmount = discountAmount;
+
     }
 
     @Override
@@ -149,6 +161,9 @@ public class Sale {
         sb.append("DETALLE DE COMPRA:\n");
         for (SalesLineItem item : items) {
             sb.append(String.format("- %s\n", item.toString()));
+        }
+        if (warrantyCost > 0) {
+            sb.append(String.format("- Costo Adicional Garantías: $%.2f\n", warrantyCost));
         }
         sb.append("-----------------------------------------\n");
         
