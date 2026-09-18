@@ -25,27 +25,20 @@ public class main {
         // 2. Inyección de Dependencias en Servicios (Lógica de Negocio)
         ProductService productService = new ProductService(productRepo);
         PersonService personService = new PersonService(personRepo);
-<<<<<<< HEAD
-        
-        SaleService saleService = new SaleService(saleRepo, productService, null);
-        
+
+        AccessoryService accessoryService = new AccessoryService(accessoryRepo);
+        SaleService saleService = new SaleService(saleRepo, productService, accessoryService);
+
         WarrantyRepository warrantyRepo = new WarrantyRepository(saleService, productService);
         WarrantyService warrantyService = new WarrantyService(warrantyRepo);
-        
+
         saleService.setWarrantyService(warrantyService);
 
-        // 3. Inicio de la Capa de Presentación (UI)
-        ConsoleMenu menu = new ConsoleMenu(productService, personService, saleService, null, warrantyService);
-=======
-        SaleService saleService = new SaleService(saleRepo, productService);
-        AccessoryService accessoryService = new AccessoryService(accessoryRepo);
-        
         ReturnRepository returnRepo = new ReturnRepository(saleService, productService, personService);
         ReturnService returnService = new ReturnService(returnRepo, saleService, productService, personService);
 
         // 3. Inicio de la Capa de Presentación (UI)
-        ConsoleMenu menu = new ConsoleMenu(productService, personService, saleService, accessoryService, returnService);
->>>>>>> origin/develop
+        ConsoleMenu menu = new ConsoleMenu(productService, personService, saleService, accessoryService, returnService, warrantyService);
         menu.start();
     }
 }

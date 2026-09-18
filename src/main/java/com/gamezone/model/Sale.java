@@ -128,8 +128,7 @@ public class Sale {
 
     public void addWarrantyCost(double cost) {
         this.warrantyCost += cost;
-
-   
+    }
 
     public void setAppliedPromotionName(String appliedPromotionName) {
         this.appliedPromotionName = appliedPromotionName;
