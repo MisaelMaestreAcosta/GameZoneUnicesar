@@ -76,16 +76,13 @@ public class ConsoleMenu {
             System.out.println("2. Registrar Nuevo Videojuego");
             System.out.println("3. Registrar Nueva Consola");
             System.out.println("4. Listar Clientes y Vendedores");
-            System.out.println("5. Registrar una Venta");
-            System.out.println("6. Ver Historial de Ventas");
-
-            System.out.println("7. Gestión de Devoluciones");
-            System.out.println("8. Consultar Balance Mensual");
-            System.out.println("9. Gestión de Garantías");
-            System.out.println("7. Gestión de Accesorios");
-            System.out.println("8. Gestión de Devoluciones");
-            System.out.println("9. Gestión de Garantías");
-            System.out.println("10. Consultar Balance Mensual");
+            System.out.println("5. Registrar Nuevo Cliente");
+            System.out.println("6. Registrar una Venta");
+            System.out.println("7. Ver Historial de Ventas");
+            System.out.println("8. Gestión de Accesorios");
+            System.out.println("9. Gestión de Devoluciones");
+            System.out.println("10. Gestión de Garantías");
+            System.out.println("11. Consultar Balance Mensual");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
 
@@ -96,12 +93,13 @@ public class ConsoleMenu {
                     case 2 -> registerVideoGame();
                     case 3 -> registerConsole();
                     case 4 -> showPersons();
-                    case 5 -> processNewSale();
-                    case 6 -> showSalesHistory();
-                    case 7 -> showAccessoryMenu();
-                    case 8 -> handleReturnsMenu();
-                    case 9 -> showWarrantyMenu();
-                    case 10 -> showMonthlyBalance();
+                    case 5 -> registerCustomer();
+                    case 6 -> processNewSale();
+                    case 7 -> showSalesHistory();
+                    case 8 -> showAccessoryMenu();
+                    case 9 -> handleReturnsMenu();
+                    case 10 -> showWarrantyMenu();
+                    case 11 -> showMonthlyBalance();
                     case 0 -> System.out.println("Saliendo del sistema... ¡Hasta luego!");
                     default -> System.out.println("Opción inválida. Intente de nuevo.");
                 }
@@ -166,6 +164,22 @@ public class ConsoleMenu {
 
         productService.registerConsole(id, title, price, stock, brand, model, generation);
         System.out.println("¡Consola registrada con éxito!");
+    }
+
+    private void registerCustomer() {
+        System.out.println("\n--- REGISTRO DE CLIENTE ---");
+        System.out.print("Nombre completo: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Documento / ID: ");
+        String id = scanner.nextLine().trim();
+        System.out.print("Teléfono: ");
+        String phone = scanner.nextLine().trim();
+        System.out.print("Correo electrónico: ");
+        String email = scanner.nextLine().trim();
+
+        Customer customer = new Customer(name, id, phone, email);
+        personService.registerCustomer(customer);
+        System.out.println("¡Cliente registrado con éxito!");
     }
 
     private void showPersons() {
