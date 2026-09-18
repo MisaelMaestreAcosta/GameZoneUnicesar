@@ -465,18 +465,34 @@ public class ConsoleMenu {
         System.out.print("Ingrese el ID de la venta original: ");
         String saleId = scanner.nextLine().trim();
 
+
+        List<Customer> customers = personService.listCustomers();
+        List<Seller> sellers = personService.listSellers();
+        List<Product> products = productService.listAllProducts();
+        List<Sale> sales = saleService.listAllSales(customers, sellers, products);
+        Sale sale = sales.stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
+
         List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
         Sale sale = allSales.stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
+
         if (sale == null) {
             System.out.println("Error: No se encontró ninguna venta con el ID '" + saleId + "'.");
             return;
         }
+
+
+        // TODO: Uncomment when canBeReturned is implemented by Desarrollador 1
+        // if (!sale.canBeReturned()) {
+        //     System.out.println("Error: La venta indicada supera los 30 días calendario permitidos para devoluciones.");
+        //     return;
+        // }
 
         long daysSinceSale = java.time.temporal.ChronoUnit.DAYS.between(sale.getDate().toLocalDate(), java.time.LocalDate.now());
         if (daysSinceSale > 30) {
             System.out.println("Error: La venta indicada supera los 30 días calendario permitidos para devoluciones.");
             return;
         }
+
 
         System.out.println("\nVenta encontrada:");
         System.out.printf("Fecha de venta: %s | Cliente: %s (ID: %s)%n",
@@ -527,7 +543,7 @@ public class ConsoleMenu {
         try {
             Return processedReturn = returnService.registerReturn(saleId, productIdsToReturn, reason);
             System.out.println("\n¡Devolución registrada exitosamente!");
-            System.out.println(processedReturn.generateReturnReceipt());
+            System.out.println(processedReturn.generateReturnReceip(processedReturn.getReturnid(), processedReturn.getDateReturn(), processedReturn.getOriginalSale(), processedReturn.getListOfRetornedProduct(), processedReturn.getReasonReturn(), processedReturn.getRefund()));
         } catch (IllegalArgumentException e) {
             System.out.println("Error al procesar la devolución: " + e.getMessage());
         }
@@ -544,7 +560,7 @@ public class ConsoleMenu {
             return;
         }
         for (Return r : returns) {
-            System.out.println(r.generateReturnReceipt());
+            System.out.println(r.generateReturnReceip(r.getReturnid(), r.getDateReturn(), r.getOriginalSale(), r.getListOfRetornedProduct(), r.getReasonReturn(), r.getRefund()));
             System.out.println();
         }
     }
@@ -564,7 +580,7 @@ public class ConsoleMenu {
         }
         System.out.printf("Se encontraron %d devolución(es) para el cliente:%n", returns.size());
         for (Return r : returns) {
-            System.out.println(r.generateReturnReceipt());
+            System.out.println(r.generateReturnReceip(r.getReturnid(), r.getDateReturn(), r.getOriginalSale(), r.getListOfRetornedProduct(), r.getReasonReturn(), r.getRefund()));
             System.out.println();
         }
     }
@@ -584,7 +600,7 @@ public class ConsoleMenu {
         }
         System.out.printf("Se encontraron %d devolución(es) para la venta:%n", returns.size());
         for (Return r : returns) {
-            System.out.println(r.generateReturnReceipt());
+            System.out.println(r.generateReturnReceip(r.getReturnid(), r.getDateReturn(), r.getOriginalSale(), r.getListOfRetornedProduct(), r.getReasonReturn(), r.getRefund()));
             System.out.println();
         }
     }
@@ -608,8 +624,16 @@ public class ConsoleMenu {
             double netBalance = returnService.generateMonthlyBalance(month, year);
 
             // Calculate components for detailed display
+
+            List<Customer> customers = personService.listCustomers();
+            List<Seller> sellers = personService.listSellers();
+            List<Product> products = productService.listAllProducts();
+            
+            double totalSales = saleService.listAllSales(customers, sellers, products).stream()
+
             List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
             double totalSales = allSales.stream()
+
                     .filter(s -> s.getDate().getYear() == year && s.getDate().getMonthValue() == month)
                     .mapToDouble(Sale::calculateTotal)
                     .sum();
@@ -619,14 +643,13 @@ public class ConsoleMenu {
                     .mapToDouble(Return::getRefund)
                     .sum();
 
+            System.out.println("     Balance Financiero");
             
-            System.out.printf("     Balance Financiero" );
-            
-            System.out.printf("  (+) Total Ventas del Mes:       ", totalSales);
-            System.out.printf("  (-) Total Devoluciones del Mes: ", totalReturns);
+            System.out.printf("  (+) Total Ventas del Mes:       $%.2f%n", totalSales);
+            System.out.printf("  (-) Total Devoluciones del Mes: $%.2f%n", totalReturns);
             System.out.println("-----------------------------------------");
-            System.out.printf("  (=) BALANCE NETO:               ", netBalance);
-            System.out.println("");
+            System.out.printf("  (=) BALANCE NETO:               $%.2f%n", netBalance);
+            System.out.println();
         } catch (NumberFormatException e) {
             System.out.println("Error: Ingrese valores numéricos válidos para mes y año.");
         } catch (Exception e) {
