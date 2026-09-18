@@ -18,7 +18,12 @@ public class Sale {
     private Customer customer;
     private Seller seller;
     private final List<SalesLineItem> items;
+
     private double warrantyCost;
+
+    private String appliedPromotionName;
+    private double discountAmount;
+
 
     public Sale(String id, Customer customer, Seller seller) {
         if (customer == null) {
@@ -116,16 +121,35 @@ public class Sale {
         return Collections.unmodifiableList(items);
     }
 
+
     public double getWarrantyCost() {
         return warrantyCost;
     }
 
     public void addWarrantyCost(double cost) {
         this.warrantyCost += cost;
+
+   
+
+    public void setAppliedPromotionName(String appliedPromotionName) {
+        this.appliedPromotionName = appliedPromotionName;
+    }
+
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+
     }
 
     @Override
     public String toString() {
+        return generateReceipt();
+    }
+
+    public String generateReceipt() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         StringBuilder sb = new StringBuilder();
         sb.append("=========================================\n");
@@ -142,7 +166,15 @@ public class Sale {
             sb.append(String.format("- Costo Adicional Garantías: $%.2f\n", warrantyCost));
         }
         sb.append("-----------------------------------------\n");
-        sb.append(String.format("TOTAL A PAGAR: $%.2f\n", calculateTotal()));
+        
+        double subtotal = calculateTotal();
+        sb.append(String.format("SUBTOTAL: $%.2f\n", subtotal));
+        
+        if (appliedPromotionName != null && !appliedPromotionName.isEmpty()) {
+            sb.append(String.format("DESCUENTO (%s): -$%.2f\n", appliedPromotionName, discountAmount));
+        }
+        
+        sb.append(String.format("TOTAL A PAGAR: $%.2f\n", subtotal - discountAmount));
         sb.append("=========================================");
         return sb.toString();
     }

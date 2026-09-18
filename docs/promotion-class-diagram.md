@@ -1,9 +1,9 @@
 ```mermaid
 classDiagram
-    %% ============================================
-    %% MODEL LAYER - PERSON HIERARCHY
-    %% ============================================
-    
+%% ============================================
+%% MODEL LAYER - PERSON HIERARCHY
+%% ============================================
+
     class Person {
         <<abstract>>
         - String id
@@ -85,44 +85,52 @@ classDiagram
     }
     
     %% ============================================
-    %% MODEL LAYER - WARRANTY HIERARCHY (REQ 4)
+    %% MODEL LAYER - PROMOTION HIERARCHY (REQ 2)
     %% ============================================
     
-    class Warranty {
+    class Promotion {
         <<abstract>>
         - String id
-        - Product product
-        - Sale sale
+        - String name
         - LocalDate startDate
         - LocalDate endDate
         --
-        + Warranty(id, product, sale, startDate)
+        + Promotion(id, name, startDate, endDate)
         + String getId()
-        + Product getProduct()
-        + Sale getSale()
+        + String getName()
         + LocalDate getStartDate()
         + LocalDate getEndDate()
-        + int getDurationInMonths()*
-        + String getWarrantyType()*
-        + double getAdditionalCost()*
         + boolean isActive(LocalDate date)
-        + String generateWarrantyCertificate()
+        + double calculateDiscount(Sale sale)*
     }
     
-    class BasicWarranty {
+    class PercentageDiscount {
+        - double percentage
         --
-        + BasicWarranty(id, product, sale, startDate)
-        + int getDurationInMonths()
-        + String getWarrantyType()
-        + double getAdditionalCost()
+        + PercentageDiscount(id, name, startDate, endDate, percentage)
+        + double getPercentage()
+        + void setPercentage(double)
+        + double calculateDiscount(Sale sale)
     }
     
-    class ExtendedWarranty {
+    class CategoryDiscount {
+        - double percentage
+        - String targetCategory
         --
-        + ExtendedWarranty(id, product, sale, startDate)
-        + int getDurationInMonths()
-        + String getWarrantyType()
-        + double getAdditionalCost()
+        + CategoryDiscount(id, name, startDate, endDate, percentage, targetCategory)
+        + double getPercentage()
+        + String getTargetCategory()
+        + double calculateDiscount(Sale sale)
+    }
+    
+    class BulkPurchaseDiscount {
+        - int minimumQuantity
+        - double percentage
+        --
+        + BulkPurchaseDiscount(id, name, startDate, endDate, minimumQuantity, percentage)
+        + int getMinimumQuantity()
+        + double getPercentage()
+        + double calculateDiscount(Sale sale)
     }
     
     %% ============================================
@@ -135,6 +143,8 @@ classDiagram
         - Customer customer
         - Seller seller
         - List~Product~ products
+        - String appliedPromotionName
+        - double discountAmount
         --
         + Sale(id, date, customer, seller, products)
         + String getId()
@@ -142,9 +152,15 @@ classDiagram
         + Customer getCustomer()
         + Seller getSeller()
         + List~Product~ getProducts()
+        + String getAppliedPromotionName()
+        + void setAppliedPromotionName(String)
+        + double getDiscountAmount()
+        + void setDiscountAmount(double)
+        + double calculateSubtotal()
         + double calculateTotal()
         + void addProduct(Product)
         + int getProductCount()
+        + String generateReceipt()
     }
     
     %% ============================================
@@ -173,12 +189,12 @@ classDiagram
         + List~Console~ loadConsoles()
     }
     
-    class WarrantyRepository {
-        - String WARRANTY_FILE
+    class PromotionRepository {
+        - String PROMOTION_FILE
         --
-        + WarrantyRepository()
-        + void saveAll(List~Warranty~)
-        + List~Warranty~ loadAll(List~Sale~ sales, List~Product~ products)
+        + PromotionRepository()
+        + void saveAll(List~Promotion~)
+        + List~Promotion~ loadAll()
     }
     
     class SaleRepository {
@@ -225,18 +241,19 @@ classDiagram
         + void saveData()
     }
     
-    class WarrantyService {
-        - WarrantyRepository repository
-        - List~Warranty~ warranties
+    class PromotionService {
+        - PromotionRepository repository
+        - List~Promotion~ promotions
         --
-        + WarrantyService()
-        + BasicWarranty assignBasicWarranty(Product, Sale, LocalDate)
-        + ExtendedWarranty assignExtendedWarranty(Product, Sale, LocalDate)
-        + Warranty findWarrantyByProduct(String, String)
-        + List~Warranty~ listAllWarranties()
-        + List~Warranty~ listActiveWarranties()
-        + List~Warranty~ listWarrantiesExpiringSoon(int)
-        + void loadData(List~Sale~ sales, List~Product~ products)
+        + PromotionService()
+        + void registerPercentageDiscount(...)
+        + void registerCategoryDiscount(...)
+        + void registerBulkPurchaseDiscount(...)
+        + List~Promotion~ listAllPromotions()
+        + List~Promotion~ listActivePromotions()
+        + Promotion findBestPromotionFor(Sale sale)
+        + Promotion findById(String id)
+        + void loadData()
         + void saveData()
     }
     
@@ -244,11 +261,11 @@ classDiagram
         - SaleRepository repository
         - PersonService personService
         - ProductService productService
-        - WarrantyService warrantyService
+        - PromotionService promotionService
         - List~Sale~ sales
         --
-        + SaleService(PersonService, ProductService, WarrantyService)
-        + void registerSale(Sale, List~String~ extendedWarrantyProductIds)
+        + SaleService(PersonService, ProductService, PromotionService)
+        + void registerSale(Sale)
         + List~Sale~ getAllSales()
         + List~Sale~ getSalesByCustomer(String)
         + List~Sale~ getSalesBySeller(String)
@@ -262,19 +279,19 @@ classDiagram
     %% UI LAYER
     %% ============================================
     
-    class ConsoleMenu {
+    class ConsoleUI {
         - PersonService personService
         - ProductService productService
-        - WarrantyService warrantyService
+        - PromotionService promotionService
         - SaleService saleService
         - Scanner scanner
         --
-        + ConsoleMenu(PersonService, ProductService, WarrantyService, SaleService)
+        + ConsoleUI(PersonService, ProductService, PromotionService, SaleService)
         + void start()
         - void showMainMenu()
         - void handleProductMenu()
         - void handlePersonMenu()
-        - void handleWarrantyMenu()
+        - void handlePromotionMenu()
         - void handleSaleMenu()
         - void registerVideoGame()
         - void registerConsole()
@@ -282,10 +299,11 @@ classDiagram
         - void registerCustomer()
         - void listAllCustomers()
         - void listAllSellers()
-        - void consultWarrantyByProduct()
-        - void listAllWarranties()
-        - void listActiveWarranties()
-        - void listWarrantiesExpiringSoon()
+        - void registerPercentageDiscount()
+        - void registerCategoryDiscount()
+        - void registerBulkPurchaseDiscount()
+        - void listAllPromotions()
+        - void listActivePromotions()
         - void registerSale()
         - void showAllSales()
         - void showCustomerHistory()
@@ -309,8 +327,9 @@ classDiagram
     Seller --|> Person
     VideoGame --|> Product
     Console --|> Product
-    BasicWarranty --|> Warranty
-    ExtendedWarranty --|> Warranty
+    PercentageDiscount --|> Promotion
+    CategoryDiscount --|> Promotion
+    BulkPurchaseDiscount --|> Promotion
     
     %% ============================================
     %% ASSOCIATION RELATIONSHIPS
@@ -323,10 +342,7 @@ classDiagram
     Customer --> Sale : 0..*
     Seller --> Sale : 0..*
     
-    Warranty --> Product : 1
-    Warranty --> Sale : 1
-    Product --> Warranty : 0..*
-    Sale --> Warranty : 0..*
+    Promotion --> Sale : 0..* applies to
     
     %% ============================================
     %% DEPENDENCY RELATIONSHIPS - SERVICE LAYER
@@ -342,35 +358,31 @@ classDiagram
     ProductService --> VideoGame
     ProductService --> Console
     
-    WarrantyService --> WarrantyRepository
-    WarrantyService --> Warranty
-    WarrantyService --> BasicWarranty
-    WarrantyService --> ExtendedWarranty
-    WarrantyService --> Product
-    WarrantyService --> Sale
+    PromotionService --> PromotionRepository
+    PromotionService --> Promotion
+    PromotionService --> PercentageDiscount
+    PromotionService --> CategoryDiscount
+    PromotionService --> BulkPurchaseDiscount
+    PromotionService --> Sale
     
     SaleService --> SaleRepository
     SaleService --> PersonService
     SaleService --> ProductService
-    SaleService --> WarrantyService
+    SaleService --> PromotionService
     SaleService --> Sale
     
     %% ============================================
     %% DEPENDENCY RELATIONSHIPS - UI LAYER
     %% ============================================
     
-    ConsoleMenu --> PersonService
-    ConsoleMenu --> ProductService
-    ConsoleMenu --> WarrantyService
-    ConsoleMenu --> SaleService
+    ConsoleUI --> PersonService
+    ConsoleUI --> ProductService
+    ConsoleUI --> PromotionService
+    ConsoleUI --> SaleService
     
-    Main --> ConsoleMenu
+    Main --> ConsoleUI
     Main --> PersonService
     Main --> ProductService
-    Main --> WarrantyService
+    Main --> PromotionService
     Main --> SaleService
-<<<<<<< HEAD
 ```
-=======
-```
->>>>>>> origin/develop

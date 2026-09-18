@@ -10,17 +10,24 @@
 
 ## This decision is located in the service layer, specifically in the SaleService.registerSale method, because it is a business rule that orchestrates the sale registration process and must determine which products require automatic warranty generation. The Java mechanism used to verify the real type of a product is the instanceof operator, which allows checking whether an object is an instance of a particular class, so when iterating over the products of the sale the system evaluates if product instanceof Console and only in that case invokes WarrantyService.assignBasicWarranty to generate the basic warranty, while video games are skipped. This belongs to the service layer because it is a business rule that coordinates actions between entities and services, not a responsibility of the Product class itself
 
+
 ## 3.  
 **Answer:**
 
 ## 
 
 ## 4. 
+
 **Answer:**
 
 ##
 
+
 ## 5. The query for "guarantees nearing expiration" requires iterating over all guarantees and filtering for those with an end date within the next 30 days. In which class should this method be placed, and what dependencies does it require? Why? Is this placement consistent with a layered architecture? 
+**Answer:**
+##
+## 5. The query for "guarantees nearing expiration" requires iterating over all guarantees and filtering for those with an end date within the next 30 days. In which class should this method be placed, and what dependencies does it require? Why? Is this placement consistent with a layered architecture?
+
 **Answer**
 
 ## This method resides in the `WarrantyService` class and relies on `WarrantyRepository` to retrieve the list of warranties. It aligns with the layered architecture because the querying, filtering, and date-range calculations constitute application or business logic, rather than presentation or atomic model logic

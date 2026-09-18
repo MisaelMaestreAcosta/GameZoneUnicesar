@@ -149,8 +149,8 @@ public class ReturnService {
 
         double totalReturns = 0.0;
         for (Return ret : returns) {
-            if (YearMonth.from(ret.getDateReturn()).equals(target)) {
-                totalReturns += ret.getRefund();
+            if (YearMonth.from(ret.getReturnDate()).equals(target)) {
+                totalReturns += ret.getRefundAmount();
             }
         }
 
