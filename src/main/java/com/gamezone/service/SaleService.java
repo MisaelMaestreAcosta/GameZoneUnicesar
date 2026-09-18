@@ -8,8 +8,11 @@ import com.gamezone.model.Seller;
 import com.gamezone.persistence.SaleRepository;
 import com.gamezone.model.Accessory;
 import com.gamezone.service.AccessoryService;
+
 import com.gamezone.model.Promotion;
 import com.gamezone.service.PromotionService;
+
+
 
 import java.util.List;
 
@@ -22,6 +25,7 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final ProductService productService;
     private AccessoryService accessoryService;
+
     private PromotionService promotionService;
 
     public SaleService(SaleRepository saleRepository, ProductService productService) {
@@ -29,11 +33,13 @@ public class SaleService {
         this.productService = productService;
     }
 
+
     public SaleService(SaleRepository saleRepository, ProductService productService, PromotionService promotionService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.promotionService = promotionService;
     }
+
 
     public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService) {
         this.saleRepository = saleRepository;
@@ -41,12 +47,14 @@ public class SaleService {
         this.accessoryService = accessoryService;
     }
 
+
     public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService, PromotionService promotionService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.accessoryService = accessoryService;
         this.promotionService = promotionService;
     }
+
 
     /**
      * Finalizes and records a sale transaction.
@@ -83,6 +91,7 @@ public class SaleService {
             } else {
                 productService.updateStock(item.getProduct().getId(), -item.getQuantity());
             }
+
         }
 
         // 3. Apply promotions
@@ -95,6 +104,7 @@ public class SaleService {
                     sale.setDiscountAmount(discount);
                 }
             }
+
         }
 
         // 4. Persist transaction in sales.txt
