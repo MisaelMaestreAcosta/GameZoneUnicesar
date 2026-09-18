@@ -1,0 +1,3 @@
+Carlos Ramírez,S001,3001112233,EMP001,Mañana
+Laura Gómez,S002,3002223344,EMP002,Tarde
+Andrés Torres,S003,3003334455,EMP003,Noche
