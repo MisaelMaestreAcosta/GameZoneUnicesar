@@ -18,6 +18,7 @@ public class Sale {
     private Customer customer;
     private Seller seller;
     private final List<SalesLineItem> items;
+    private double warrantyCost;
 
     public Sale(String id, Customer customer, Seller seller) {
         if (customer == null) {
@@ -31,6 +32,7 @@ public class Sale {
         this.customer = customer;
         this.seller = seller;
         this.items = new ArrayList<>();
+        this.warrantyCost = 0.0;
     }
 
     /**
@@ -56,7 +58,7 @@ public class Sale {
         for (SalesLineItem item : items) {
             total += item.calculateSubtotal();
         }
-        return total;
+        return total + warrantyCost;
     }
 
     /**
@@ -110,6 +112,14 @@ public class Sale {
         return Collections.unmodifiableList(items);
     }
 
+    public double getWarrantyCost() {
+        return warrantyCost;
+    }
+
+    public void addWarrantyCost(double cost) {
+        this.warrantyCost += cost;
+    }
+
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -123,6 +133,9 @@ public class Sale {
         sb.append("DETALLE DE COMPRA:\n");
         for (SalesLineItem item : items) {
             sb.append(String.format("- %s\n", item.toString()));
+        }
+        if (warrantyCost > 0) {
+            sb.append(String.format("- Costo Adicional Garantías: $%.2f\n", warrantyCost));
         }
         sb.append("-----------------------------------------\n");
         sb.append(String.format("TOTAL A PAGAR: $%.2f\n", calculateTotal()));
