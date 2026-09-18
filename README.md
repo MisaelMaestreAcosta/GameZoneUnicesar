@@ -5,3 +5,6 @@ Sistema de información en Java para la gestión de la tienda de videojuegos Gam
 * **Automated Inventory:** Automatically restores the stock quantity of returned products in the system.
 * **Monthly Balance Report:** Generates a financial summary for a specific month and year, displaying total sales, total returns, and the net balance.
 * **Return Queries:** Supports querying the return history globally, by specific customer, or by the original sale ID.
+* **Warranty Management:** Automatically generates 6-month basic warranties for console purchases.
+* **Extended Warranties:** Offers an optional 12-month extended warranty for consoles with an additional 10% cost during sales.
+* **Warranty Tracking:** Allows querying active warranties, soon-to-expire warranties, and validating coverage based on product and sale IDs.
