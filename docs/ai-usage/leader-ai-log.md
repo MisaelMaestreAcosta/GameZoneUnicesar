@@ -182,7 +182,7 @@
 | **Decisión** | Se incorporó la limpieza del buffer en todos los flujos de captura de datos de la interfaz de usuario, estabilizando la navegación entre los menús de Accesorios, Promociones y Devoluciones. |
 | **Commit relacionado** | `fix(ui): resolve scanner buffer issue in ConsoleMenu input handling` |
 
-```markdown
+
 ## 13. Diseño de Jerarquía de Clases con Abstracción
 
 | Campo | Contenido |
@@ -240,4 +240,3 @@
 | **Respuesta** | Se explicó el concepto de validación de nulidad (Guards). Se sugirió envolver la lógica de impresión del descuento en un condicional `if (sale.getPromotion() != null)`, evitando así que la JVM intente acceder a métodos de una referencia inexistente en la memoria. |
 | **Decisión** | Se añadieron guardas de validación (`if != null`) en el método `printTicket()` de la clase `Sale`. Si no hay promoción asignada, el ticket omite la línea de descuento e imprime directamente el total regular. |
 | **Commit relacionado** | `fix(sale): guard against NullPointerException when printing sales without promos` |
-
