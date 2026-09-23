@@ -1,12 +1,4 @@
 
-## 1. 
-**Answer:**
-##
-
-## 2.
-**Answer:**
-##
-=======
 ## 1. Should accessories be integrated into the existing product hierarchy (extending Product) or should they form an independent hierarchy? Justify your decision considering code reuse and model coherence.
 **Answer:**
 ## Accessories should form an independent hierarchy that inherits from an abstract Accessory class, because although they share attributes with Product such as id, title, price, and stockQuantity, an accessory is not a sellable product of the same category as a video game or a console and has its own features such as console compatibility that do not apply to base products, and if more accessory types are added in the future or their rules change the modifications remain isolated in their own hierarchy without affecting existing products, achieving reuse through composition or by duplicating the minimal common attributes in the Accessory base class, so an independent Accessory hierarchy is created with the subclasses Controller, Cable, and Memory while keeping the Product hierarchy intact.
