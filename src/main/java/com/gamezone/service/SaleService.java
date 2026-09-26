@@ -50,6 +50,12 @@ public class SaleService {
     }
 
 
+    private PromotionService promotionService;
+
+    public void setPromotionService(PromotionService promotionService) {
+        this.promotionService = promotionService;
+    }
+
     /**
      * Finalizes and records a sale transaction.
      * Validates business invariants, verifies stock, decrements inventory, and commits persistence.
@@ -58,9 +64,10 @@ public class SaleService {
      * @param productIdsWithExtendedWarranty List of product IDs that should receive an extended warranty
      */
     public void registerSale(Sale sale, List<String> productIdsWithExtendedWarranty) {
+        // 1. Validar que la venta tenga al menos un ítem.
         sale.validateSale();
 
-        // 1. Verify stock availability for all items before applying changes
+        // 2. Resolver cada ítem como producto o accesorio y validar su stock.
         for (SalesLineItem item : sale.getItems()) {
             Product currentProduct = null;
             if (item.getProduct() instanceof Accessory && accessoryService != null) {
@@ -79,36 +86,37 @@ public class SaleService {
             }
         }
 
-        // 2. Decrement inventory through ProductService or AccessoryService
-        for (SalesLineItem item : sale.getItems()) {
-
-            productService.updateStock(item.getProduct().getId(), -item.getQuantity());
-            
-            // Assign warranties
-            Product product = item.getProduct();
-            if (product instanceof com.gamezone.model.Console) {
-                if (warrantyService != null) {
-                    warrantyService.assignBasicWarranty(product, sale, sale.getDate().toLocalDate());
-                }
+        // 4. Consultar PromotionService.findBestPromotionFor(sale) y registrar el descuento
+        if (promotionService != null) {
+            com.gamezone.model.Promotion bestPromotion = promotionService.findBestPromotionFor(sale);
+            if (bestPromotion != null) {
+                sale.setAppliedPromotionName(bestPromotion.getName());
+                sale.setDiscountAmount(bestPromotion.calculateDiscount(sale));
             }
-            if (productIdsWithExtendedWarranty != null && productIdsWithExtendedWarranty.contains(product.getId())) {
-                if (warrantyService != null) {
+        }
+
+        for (SalesLineItem item : sale.getItems()) {
+            Product product = item.getProduct();
+            
+            // 7. Actualizar inventario delegando en ProductService o AccessoryService
+            if (product instanceof Accessory && accessoryService != null) {
+                accessoryService.updateStock(product.getId(), -item.getQuantity());
+            } else {
+                productService.updateStock(product.getId(), -item.getQuantity());
+            }
+
+            // 5. Generar la garantía básica de cada consola y las garantías extendidas solicitadas
+            if (product instanceof com.gamezone.model.Console && warrantyService != null) {
+                warrantyService.assignBasicWarranty(product, sale, sale.getDate().toLocalDate());
+                
+                if (productIdsWithExtendedWarranty != null && productIdsWithExtendedWarranty.contains(product.getId())) {
                     com.gamezone.model.ExtendedWarranty ew = warrantyService.assignExtendedWarranty(product, sale, sale.getDate().toLocalDate());
                     sale.addWarrantyCost(ew.getAdditionalCost());
                 }
             }
-
-            if (item.getProduct() instanceof Accessory && accessoryService != null) {
-                accessoryService.updateStock(item.getProduct().getId(), -item.getQuantity());
-            } else {
-                productService.updateStock(item.getProduct().getId(), -item.getQuantity());
-            }
-
-
         }
 
-
-        // 4. Persist transaction in sales.txt
+        // 8. Persistir la venta
         saleRepository.save(sale);
     }
 
