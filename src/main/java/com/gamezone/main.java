@@ -11,8 +11,10 @@ import com.gamezone.service.WarrantyService;
 import com.gamezone.ui.ConsoleMenu;
 import com.gamezone.persistence.AccessoryRepository;
 import com.gamezone.persistence.ReturnRepository;
+import com.gamezone.persistence.PromotionRepository;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.ReturnService;
+import com.gamezone.service.PromotionService;
 
 public class main {
 
@@ -22,12 +24,16 @@ public class main {
         PersonRepository personRepo = new PersonRepository();
         SaleRepository saleRepo = new SaleRepository();
         AccessoryRepository accessoryRepo = new AccessoryRepository();
+        PromotionRepository promotionRepo = new PromotionRepository();
         // 2. Inyección de Dependencias en Servicios (Lógica de Negocio)
         ProductService productService = new ProductService(productRepo);
         PersonService personService = new PersonService(personRepo);
 
         AccessoryService accessoryService = new AccessoryService(accessoryRepo);
         SaleService saleService = new SaleService(saleRepo, productService, accessoryService);
+
+        PromotionService promotionService = new PromotionService(promotionRepo);
+        saleService.setPromotionService(promotionService);
 
         WarrantyRepository warrantyRepo = new WarrantyRepository(saleService, productService);
         WarrantyService warrantyService = new WarrantyService(warrantyRepo);
