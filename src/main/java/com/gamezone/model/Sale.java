@@ -54,16 +54,25 @@ public class Sale {
     }
 
     /**
-     * Information Expert: aggregates individual item subtotals.
+     * Calculates the subtotal of the items in the sale without discounts or warranties.
+     * 
+     * @return Subtotal of items
+     */
+    public double calculateSubtotal() {
+        double subtotal = 0.0;
+        for (SalesLineItem item : items) {
+            subtotal += item.calculateSubtotal();
+        }
+        return subtotal;
+    }
+
+    /**
+     * Information Expert: aggregates individual item subtotals, applies discounts and adds warranty costs.
      * 
      * @return Total monetary cost of the sale
      */
     public double calculateTotal() {
-        double total = 0.0;
-        for (SalesLineItem item : items) {
-            total += item.calculateSubtotal();
-        }
-        return total + warrantyCost;
+        return calculateSubtotal() - discountAmount + warrantyCost;
     }
 
     /**
@@ -165,15 +174,14 @@ public class Sale {
             sb.append(String.format("- Costo Adicional Garantías: $%.2f\n", warrantyCost));
         }
         sb.append("-----------------------------------------\n");
-        
-        double subtotal = calculateTotal();
+        double subtotal = calculateSubtotal();
         sb.append(String.format("SUBTOTAL: $%.2f\n", subtotal));
         
         if (appliedPromotionName != null && !appliedPromotionName.isEmpty()) {
             sb.append(String.format("DESCUENTO (%s): -$%.2f\n", appliedPromotionName, discountAmount));
         }
         
-        sb.append(String.format("TOTAL A PAGAR: $%.2f\n", subtotal - discountAmount));
+        sb.append(String.format("TOTAL A PAGAR: $%.2f\n", calculateTotal()));
         sb.append("=========================================");
         return sb.toString();
     }
