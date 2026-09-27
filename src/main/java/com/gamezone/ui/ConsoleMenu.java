@@ -26,6 +26,7 @@ import java.util.Arrays;
 
 import com.gamezone.model.Accessory;
 import com.gamezone.service.AccessoryService;
+import com.gamezone.service.PromotionService;
 
 import java.util.Arrays;
 
@@ -54,15 +55,17 @@ public class ConsoleMenu {
     private final ReturnService returnService;
 
     private final WarrantyService warrantyService;
+    private final PromotionService promotionService;
     private final Scanner scanner;
 
-    public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, AccessoryService accessoryService, ReturnService returnService, WarrantyService warrantyService) {
+    public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, AccessoryService accessoryService, ReturnService returnService, WarrantyService warrantyService, PromotionService promotionService) {
         this.productService = productService;
         this.personService = personService;
         this.saleService = saleService;
         this.accessoryService = accessoryService;
         this.returnService = returnService;
         this.warrantyService = warrantyService;
+        this.promotionService= promotionService;
         this.scanner = new Scanner(System.in);
     }
 
@@ -83,6 +86,7 @@ public class ConsoleMenu {
             System.out.println("9. Gestión de Devoluciones");
             System.out.println("10. Gestión de Garantías");
             System.out.println("11. Consultar Balance Mensual");
+            System.out.println("12. Registrar promociones por categoria");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
 
@@ -100,6 +104,7 @@ public class ConsoleMenu {
                     case 9 -> handleReturnsMenu();
                     case 10 -> showWarrantyMenu();
                     case 11 -> showMonthlyBalance();
+                    case 12 -> registerCategoryPromotion();
                     case 0 -> System.out.println("Saliendo del sistema... ¡Hasta luego!");
                     default -> System.out.println("Opción inválida. Intente de nuevo.");
                 }
@@ -774,6 +779,47 @@ public class ConsoleMenu {
         } catch (Exception e) {
             System.out.println("Error al calcular el balance: " + e.getMessage());
 
+        }
+    }
+    private void registerCategoryPromotion() {
+        System.out.println("\n--- REGISTRAR PROMOCION POR CATEGORIA ---");
+
+        System.out.print("ID de la promocion: ");
+        String id = scanner.nextLine().trim();
+
+        System.out.print("Nombre: ");
+        String name = scanner.nextLine().trim();
+
+        System.out.print("Fecha de inicio (AAAA-MM-DD): ");
+        LocalDate startDate = LocalDate.parse(scanner.nextLine().trim());
+
+        System.out.print("Fecha de finalización (AAAA-MM-DD): ");
+        LocalDate endDate = LocalDate.parse(scanner.nextLine().trim());
+
+        System.out.print("Porcentaje de descuento: ");
+        double percentage = Double.parseDouble(scanner.nextLine().trim());
+
+        System.out.println("Categorias: 1. Videojuego  2. Consola  3. Accesorio");
+        System.out.print("Seleccione una categoria: ");
+
+        String category = switch (scanner.nextLine().trim()) {
+            case "1" -> "VIDEOGAME";
+            case "2" -> "CONSOLE";
+            case "3" -> "ACCESSORY";
+            default -> null;
+        };
+
+        if (category == null) {
+            System.out.println("Categoría invalida.");
+            return;
+        }
+
+        try {
+            promotionService.registerCategoryDiscount(
+                    id, name, startDate, endDate, percentage, category);
+            System.out.println("Promocion registrada correctamente.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("No se pudo registrar la promocion: " + e.getMessage());
         }
     }
 }
