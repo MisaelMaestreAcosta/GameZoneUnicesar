@@ -13,6 +13,8 @@ import com.gamezone.persistence.AccessoryRepository;
 import com.gamezone.persistence.ReturnRepository;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.ReturnService;
+import com.gamezone.persistence.PromotionRepository;
+import com.gamezone.service.PromotionService;
 
 public class main {
 
@@ -22,6 +24,7 @@ public class main {
         PersonRepository personRepo = new PersonRepository();
         SaleRepository saleRepo = new SaleRepository();
         AccessoryRepository accessoryRepo = new AccessoryRepository();
+        PromotionRepository promotionRepo = new PromotionRepository();
         // 2. Inyección de Dependencias en Servicios (Lógica de Negocio)
         ProductService productService = new ProductService(productRepo);
         PersonService personService = new PersonService(personRepo);
@@ -36,9 +39,11 @@ public class main {
 
         ReturnRepository returnRepo = new ReturnRepository(saleService, productService, personService);
         ReturnService returnService = new ReturnService(returnRepo, saleService, productService, personService);
+        
+        PromotionService promotionService = new PromotionService(promotionRepo);
 
         // 3. Inicio de la Capa de Presentación (UI)
-        ConsoleMenu menu = new ConsoleMenu(productService, personService, saleService, accessoryService, returnService, warrantyService);
+        ConsoleMenu menu = new ConsoleMenu(productService, personService, saleService, accessoryService, returnService, warrantyService, promotionService);
         menu.start();
     }
 }
