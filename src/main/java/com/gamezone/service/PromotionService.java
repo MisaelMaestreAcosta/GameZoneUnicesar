@@ -32,6 +32,11 @@ public class PromotionService {
     }
 
     public void registerCategoryDiscount(String id, String name, LocalDate startDate, LocalDate endDate, double percentage, String targetCategory) {
+        
+        if (!"VIDEOGAME".equals(targetCategory)&& !"CONSOLE".equals(targetCategory)&& !"ACCESSORY".equals(targetCategory)) {
+            throw new IllegalArgumentException("la categoria debe ser VIDEOGAME,CONSOLE O ACCESSORY");
+        }
+        
         CategoryDiscount promo = new CategoryDiscount(id, name, startDate, endDate, percentage, targetCategory);
         promotions.add(promo);
         repository.saveAll(promotions);
