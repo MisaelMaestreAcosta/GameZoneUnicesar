@@ -50,22 +50,64 @@ public class Return {
     }
     
     public double calculateRefundAmount() {
-        double total = 0.0;
-        if ( listOfRetornedProduct!= null) {
-            for (Product product : listOfRetornedProduct) {
-                total += product.getPrice();
-            }
+        if (originalSale == null || listOfRetornedProduct == null|| listOfRetornedProduct.isEmpty()) {
+            refund = 0.0;
+            return refund;
         }
-        this.refund = total;
-        return total;
+
+        double saleSubtotal = 0.0;
+        for (SalesLineItem item : originalSale.getItems()) {
+            saleSubtotal += item.getUnitPrice() * item.getQuantity();
+        }
+
+        // Avoid division by zero when the original sale has no priced items.
+        if (saleSubtotal <= 0.0) {
+            refund = 0.0;
+            return refund;
+        }
+
+        double discountRatio = originalSale.getDiscountAmount() / saleSubtotal;
+        double totalRefund = 0.0;
+
+        for (Product returnedProduct : listOfRetornedProduct) {
+            totalRefund += returnedProduct.getPrice() * (1.0 - discountRatio);
+        }
+
+        refund = totalRefund;
+        return refund;
     }
 
 
 
     public String generateReturnReceipt() {
+        StringBuilder details = new StringBuilder();
+        double saleSubtotal = 0.0;
 
+        if (originalSale != null) {
+            for (SalesLineItem item : originalSale.getItems()) {
+                saleSubtotal += item.getUnitPrice() * item.getQuantity();
+            }
+        }
 
-         return String.format(
+        double discountRatio = saleSubtotal > 0.0 ? originalSale.getDiscountAmount() / saleSubtotal: 0.0;
+
+        if (listOfRetornedProduct != null) {
+            for (Product product : listOfRetornedProduct) {
+                double listPrice = product.getPrice();
+                double proportionalDiscount = listPrice * discountRatio;
+                double itemRefund = listPrice - proportionalDiscount;
+
+                details.append(String.format(
+                        "- %s | Precio de lista: $%.2f | Descuento proporcional: $%.2f"
+                                + " | Reembolso: $%.2f%n",
+                        product.getTitle(),
+                        listPrice,
+                        proportionalDiscount,
+                        itemRefund));
+            }
+        }
+
+        return String.format(
             "========================================%n" +
             "           RECIBO DE DEVOLUCIÓN        %n" +
             "========================================%n" +
@@ -81,9 +123,9 @@ public class Return {
             "========================================%n",
             returnid,
             dateReturn,
-            originalSale.getId(), 
+            originalSale != null ? originalSale.getId() : "N/A", 
             reasonReturn,
-            listOfRetornedProduct.toString(),
+            details.toString(),
             refund
         );
     }
