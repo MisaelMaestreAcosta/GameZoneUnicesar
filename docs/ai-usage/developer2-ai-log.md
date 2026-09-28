@@ -55,3 +55,6 @@ Esta bitácora documenta el uso de asistencia de IA (Claude) durante el desarrol
 | Sugerencia de redacción del título/descripción del PR | Legítimo (ayuda de redacción/documentación) |
 | Diseño de clases, atributos y lógica de negocio | No delegado a la IA — realizado de forma independiente |
 | Respuestas de analysis.md | No delegado a la IA — realizado de forma independiente |
+
+## Caso con la Rama:
+El programador 2 utilizó el comando `git push --force` porque se presentó un inconveniente con una rama específica que no aceptaba los nuevos cambios. Al forzar el envío, se sobrescribió el historial remoto y se eliminaron los commits de sus compañeros, lo que obligó a que ellos tuvieran que rehacer y volver a subir sus commits.
