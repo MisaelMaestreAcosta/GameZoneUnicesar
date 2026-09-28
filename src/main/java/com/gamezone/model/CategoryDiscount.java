@@ -19,7 +19,7 @@ public class CategoryDiscount extends Promotion{
      * @param startDate the start date of validity
      * @param endDate the end date of validity
      * @param discountPercentage the percentage discount (0-100)
-     * @param targetCategory the target category ("VIDEOGAME" or "CONSOLE")
+     * @param targetCategory the target category ("VIDEOGAME", "CONSOLE" or ACCESSORY)
      */
 
     public CategoryDiscount(String id, String name, LocalDate startDate, LocalDate endDate, double discountPercentage, String targetCategory) {
@@ -52,15 +52,19 @@ public class CategoryDiscount extends Promotion{
     
     @Override
     public double calculateDiscount(Sale sale) {
+        if (sale == null || sale.getItems() == null) {
+            return 0.0;
+        }
+        
         double matchingTotal = 0.0;
+        
         for (SalesLineItem item : sale.getItems()) {
             Product product = item.getProduct();
-            if (product != null) {
-                if ("VIDEOGAME".equals(targetCategory) && product instanceof Videogame) {
-                    matchingTotal += product.getPrice() * item.getQuantity();
-                } else if ("CONSOLE".equals(targetCategory) && product instanceof Console) {
-                    matchingTotal += product.getPrice() * item.getQuantity();
-                }
+            
+            if ("VIDEOGAME".equals(targetCategory) && product instanceof Videogame
+                || "CONSOLE".equals(targetCategory) && product instanceof Console
+                || "ACCESSORY".equals(targetCategory) && product instanceof Accessory) {
+                matchingTotal += item.getUnitPrice() * item.getQuantity();
             }
         }
         return matchingTotal * discountPercentage / 100;
