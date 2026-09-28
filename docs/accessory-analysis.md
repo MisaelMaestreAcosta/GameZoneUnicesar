@@ -1,11 +1,3 @@
-
-## 1. 
-**Answer:**
-##
-
-## 2.
-**Answer:**
-##
 =======
 ## 1. Should accessories be integrated into the existing product hierarchy (extending Product) or should they form an independent hierarchy? Justify your decision considering code reuse and model coherence.
 **Answer:**
@@ -14,15 +6,14 @@
 ## 2.  What attributes are common to the three types of accessories and which are specific to each type? How is this distinction reflected in the module's class hierarchy?
 **Answer:**
 ## The common attributes to the three types of accessories are id, title, price, stockQuantity, and compatibleConsoles which are declared in the abstract base class Accessory, while the specific attributes are connectionType for Controller, lengthInMeters and connectorType for Cable, and capacityInGB and memoryType for Memory, and this distinction is reflected by creating an abstract class Accessory containing the common attributes and three concrete subclasses Controller, Cable, and Memory that inherit from it and add their own attributes, which allows code reuse and correctly models each type of accessory.
->>>>>>> origin/develop
 
-## 3.  
+## 3.  The compatibility between an accessory and a console is a relationship between two system entities. How is this relationship represented in the design and in persistence? Is compatibility an attribute of the accessory, of the console, or of both?
 **Answer:**
-## 
+## Compatibility is a many-to-many association between accessories and consoles: one accessory can work with several consoles, and one console can have several compatible accessories. Because of this, it is not an attribute of the accessory alone, nor of the console alone, nor of both; it belongs to the relationship itself. In the design, it is represented as an association between Accessory and Console, either as a collection of compatible consoles held by the accessory or as an explicit association class if the relationship needs its own data. In persistence, it is stored in a junction table, for example accessory_console_compatibility(accessory_id, console_id), with a composite primary key and two foreign keys. Storing it as a column in either table would force repeating groups and break first normal form.
 
-## 4. 
+## 4. What modifications are needed in the sales service class (SaleService) so that sales can include accessories without breaking the existing behavior with video games and consoles?
 **Answer:**
-##
+## Accessory must implement the same sellable abstraction as Videogame and Console (for example a Product or Sellable interface), and SaleService must depend on that abstraction instead of concrete types. That way, the existing logic for price calculation, stock validation, and sale line creation works polymorphically, and accessories go through the same flow without changing existing method signatures. Accessory-specific rules, such as validating that the accessory is compatible with a console included in the same sale, are added as an extension of the service. The sale line persistence must also be updated so it can reference any product type, for example with product_id and product_type columns. Finally, regression tests should confirm that sales of video games and consoles behave exactly as before.
 
 ## 5.In which layer of the system architecture should the new classes of the accessories module be placed? Justify your decision based on the responsibilities of each layer. 
 **Answer**
