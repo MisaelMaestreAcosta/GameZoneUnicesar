@@ -11,9 +11,13 @@ import com.gamezone.service.WarrantyService;
 import com.gamezone.ui.ConsoleMenu;
 import com.gamezone.persistence.AccessoryRepository;
 import com.gamezone.persistence.ReturnRepository;
+import com.gamezone.persistence.PromotionRepository;
 import com.gamezone.service.AccessoryService;
 import com.gamezone.service.ReturnService;
+
+
 import com.gamezone.persistence.PromotionRepository;
+
 import com.gamezone.service.PromotionService;
 
 public class main {
@@ -31,6 +35,9 @@ public class main {
 
         AccessoryService accessoryService = new AccessoryService(accessoryRepo);
         SaleService saleService = new SaleService(saleRepo, productService, accessoryService);
+
+        PromotionService promotionService = new PromotionService(promotionRepo);
+        saleService.setPromotionService(promotionService);
 
         WarrantyRepository warrantyRepo = new WarrantyRepository(saleService, productService);
         WarrantyService warrantyService = new WarrantyService(warrantyRepo);
