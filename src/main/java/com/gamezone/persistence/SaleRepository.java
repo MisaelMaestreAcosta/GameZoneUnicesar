@@ -50,14 +50,20 @@ public class SaleRepository {
      */
     public void save(Sale sale) {
         try (BufferedWriter writer = Files.newBufferedWriter(filePath, java.nio.file.StandardOpenOption.APPEND)) {
-            // Write Sale Header
+            // Write Sale Header: SALE;id;date;customer;seller;total;promotionName;discount;warrantyCost
+            String promotionName = sale.getAppliedPromotionName() == null
+                    ? ""
+                    : sale.getAppliedPromotionName().replace(SEPARATOR, ",");
             writer.write(String.join(SEPARATOR,
                     "SALE",
                     sale.getId(),
                     sale.getDate().toString(),
                     sale.getCustomer().getId(),
                     sale.getSeller().getId(),
-                    String.valueOf(sale.calculateTotal())
+                    String.valueOf(sale.calculateTotal()),
+                    promotionName,
+                    String.valueOf(sale.getDiscountAmount()),
+                    String.valueOf(sale.getWarrantyCost())
             ));
             writer.newLine();
 
@@ -114,7 +120,17 @@ public class SaleRepository {
                     if (customer != null && seller != null) {
                         currentSale = new Sale(saleId, customer, seller);
                         currentSale.setDate(date);
+                        // Extended header (A3). Older records only have 6 fields.
+                        if (fields.length >= 9) {
+                            if (!fields[6].isEmpty()) {
+                                currentSale.setAppliedPromotionName(fields[6]);
+                            }
+                            currentSale.setDiscountAmount(Double.parseDouble(fields[7]));
+                            currentSale.addWarrantyCost(Double.parseDouble(fields[8]));
+                        }
                         sales.add(currentSale);
+                    } else {
+                        currentSale = null;
                     }
                 } else if ("ITEM".equalsIgnoreCase(fields[0]) && fields.length >= 5 && currentSale != null) {
                     String productId = fields[2];

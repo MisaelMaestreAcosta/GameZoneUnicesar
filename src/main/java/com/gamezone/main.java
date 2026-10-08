@@ -46,8 +46,6 @@ public class main {
 
         ReturnRepository returnRepo = new ReturnRepository(saleService, productService, personService);
         ReturnService returnService = new ReturnService(returnRepo, saleService, productService, personService);
-        
-        PromotionService promotionService = new PromotionService(promotionRepo);
 
         // 3. Inicio de la Capa de Presentación (UI)
         ConsoleMenu menu = new ConsoleMenu(productService, personService, saleService, accessoryService, returnService, warrantyService, promotionService);
