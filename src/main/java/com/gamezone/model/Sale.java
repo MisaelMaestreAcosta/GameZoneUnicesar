@@ -139,6 +139,10 @@ public class Sale {
         this.warrantyCost += cost;
     }
 
+    public String getAppliedPromotionName() {
+        return appliedPromotionName;
+    }
+
     public void setAppliedPromotionName(String appliedPromotionName) {
         this.appliedPromotionName = appliedPromotionName;
     }
@@ -170,15 +174,16 @@ public class Sale {
         for (SalesLineItem item : items) {
             sb.append(String.format("- %s\n", item.toString()));
         }
-        if (warrantyCost > 0) {
-            sb.append(String.format("- Costo Adicional Garantías: $%.2f\n", warrantyCost));
-        }
         sb.append("-----------------------------------------\n");
         double subtotal = calculateSubtotal();
         sb.append(String.format("SUBTOTAL: $%.2f\n", subtotal));
         
         if (appliedPromotionName != null && !appliedPromotionName.isEmpty()) {
             sb.append(String.format("DESCUENTO (%s): -$%.2f\n", appliedPromotionName, discountAmount));
+        }
+
+        if (warrantyCost > 0) {
+            sb.append(String.format("GARANTIAS EXTENDIDAS: +$%.2f\n", warrantyCost));
         }
         
         sb.append(String.format("TOTAL A PAGAR: $%.2f\n", calculateTotal()));
