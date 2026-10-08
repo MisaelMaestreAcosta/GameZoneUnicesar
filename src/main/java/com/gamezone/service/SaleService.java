@@ -57,17 +57,17 @@ public class SaleService {
     }
 
     /**
-     * Finalizes and records a sale transaction.
-     * Validates business invariants, verifies stock, decrements inventory, and commits persistence.
+     * Finalizes and records a sale transaction following the unified sales flow (A3):
+     * 1. Validate stock, 2. Calculate subtotal, 3. Apply best promotion,
+     * 4. Assign warranties, 5. Update stock, 6. Persist the sale.
      *
      * @param sale The sale transaction to complete
      * @param productIdsWithExtendedWarranty List of product IDs that should receive an extended warranty
      */
     public void registerSale(Sale sale, List<String> productIdsWithExtendedWarranty) {
-        // 1. Validar que la venta tenga al menos un ítem.
         sale.validateSale();
 
-        // 2. Resolver cada ítem como producto o accesorio y validar su stock.
+        // 1. Validar stock: resolver cada ítem como producto o accesorio y verificar disponibilidad.
         for (SalesLineItem item : sale.getItems()) {
             Product currentProduct = null;
             if (item.getProduct() instanceof Accessory && accessoryService != null) {
@@ -86,37 +86,45 @@ public class SaleService {
             }
         }
 
-        // 4. Consultar PromotionService.findBestPromotionFor(sale) y registrar el descuento
-        if (promotionService != null) {
+        // 2. Calcular subtotal (solo ítems, sin descuentos ni garantías).
+        double subtotal = sale.calculateSubtotal();
+
+        // 3. Aplicar la mejor promoción vigente sobre el subtotal.
+        if (promotionService != null && subtotal > 0) {
             com.gamezone.model.Promotion bestPromotion = promotionService.findBestPromotionFor(sale);
             if (bestPromotion != null) {
+                double discount = Math.min(bestPromotion.calculateDiscount(sale), subtotal);
                 sale.setAppliedPromotionName(bestPromotion.getName());
-                sale.setDiscountAmount(bestPromotion.calculateDiscount(sale));
+                sale.setDiscountAmount(discount);
             }
         }
 
+        // 4. Asignar garantía básica a cada consola y las extendidas solicitadas.
+        if (warrantyService != null) {
+            for (SalesLineItem item : sale.getItems()) {
+                Product product = item.getProduct();
+                if (product instanceof com.gamezone.model.Console) {
+                    warrantyService.assignBasicWarranty(product, sale, sale.getDate().toLocalDate());
+
+                    if (productIdsWithExtendedWarranty != null && productIdsWithExtendedWarranty.contains(product.getId())) {
+                        com.gamezone.model.ExtendedWarranty ew = warrantyService.assignExtendedWarranty(product, sale, sale.getDate().toLocalDate());
+                        sale.addWarrantyCost(ew.getAdditionalCost());
+                    }
+                }
+            }
+        }
+
+        // 5. Actualizar inventario delegando en ProductService o AccessoryService.
         for (SalesLineItem item : sale.getItems()) {
             Product product = item.getProduct();
-            
-            // 7. Actualizar inventario delegando en ProductService o AccessoryService
             if (product instanceof Accessory && accessoryService != null) {
                 accessoryService.updateStock(product.getId(), -item.getQuantity());
             } else {
                 productService.updateStock(product.getId(), -item.getQuantity());
             }
-
-            // 5. Generar la garantía básica de cada consola y las garantías extendidas solicitadas
-            if (product instanceof com.gamezone.model.Console && warrantyService != null) {
-                warrantyService.assignBasicWarranty(product, sale, sale.getDate().toLocalDate());
-                
-                if (productIdsWithExtendedWarranty != null && productIdsWithExtendedWarranty.contains(product.getId())) {
-                    com.gamezone.model.ExtendedWarranty ew = warrantyService.assignExtendedWarranty(product, sale, sale.getDate().toLocalDate());
-                    sale.addWarrantyCost(ew.getAdditionalCost());
-                }
-            }
         }
 
-        // 8. Persistir la venta
+        // 6. Persistir la venta.
         saleRepository.save(sale);
     }
 
