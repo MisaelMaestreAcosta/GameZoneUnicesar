@@ -15,7 +15,7 @@ graph TD
     end
     
     subgraph Model["Model Layer"]
-        Model_Classes["Person, Customer, Seller, Product, VideoGame, Console, Accessory, Sale, Promotion, Warranty, Return"]
+        Model_Classes["Person, Customer, Seller, Product, Videogame, Console, Accessory, Controller, Cable, Memory, Promotion, PercentageDiscount, CategoryDiscount, BulkPurchaseDiscount, Sale, SalesLineItem, Warranty, BasicWarranty, ExtendedWarranty, Return"]
     end
     
     UI --> Service

@@ -50,9 +50,16 @@ public class SaleService {
     }
 
 
+    private PromotionService promotionService;
+
+    public void setPromotionService(PromotionService promotionService) {
+        this.promotionService = promotionService;
+    }
+
     /**
-     * Finalizes and records a sale transaction.
-     * Validates business invariants, verifies stock, decrements inventory, and commits persistence.
+     * Finalizes and records a sale transaction following the unified sales flow (A3):
+     * 1. Validate stock, 2. Calculate subtotal, 3. Apply best promotion,
+     * 4. Assign warranties, 5. Update stock, 6. Persist the sale.
      *
      * @param sale The sale transaction to complete
      * @param productIdsWithExtendedWarranty List of product IDs that should receive an extended warranty
@@ -60,7 +67,7 @@ public class SaleService {
     public void registerSale(Sale sale, List<String> productIdsWithExtendedWarranty) {
         sale.validateSale();
 
-        // 1. Verify stock availability for all items before applying changes
+        // 1. Validar stock: resolver cada ítem como producto o accesorio y verificar disponibilidad.
         for (SalesLineItem item : sale.getItems()) {
             Product currentProduct = null;
             if (item.getProduct() instanceof Accessory && accessoryService != null) {
@@ -79,36 +86,45 @@ public class SaleService {
             }
         }
 
-        // 2. Decrement inventory through ProductService or AccessoryService
-        for (SalesLineItem item : sale.getItems()) {
+        // 2. Calcular subtotal (solo ítems, sin descuentos ni garantías).
+        double subtotal = sale.calculateSubtotal();
 
-            productService.updateStock(item.getProduct().getId(), -item.getQuantity());
-            
-            // Assign warranties
-            Product product = item.getProduct();
-            if (product instanceof com.gamezone.model.Console) {
-                if (warrantyService != null) {
-                    warrantyService.assignBasicWarranty(product, sale, sale.getDate().toLocalDate());
-                }
+        // 3. Aplicar la mejor promoción vigente sobre el subtotal.
+        if (promotionService != null && subtotal > 0) {
+            com.gamezone.model.Promotion bestPromotion = promotionService.findBestPromotionFor(sale);
+            if (bestPromotion != null) {
+                double discount = Math.min(bestPromotion.calculateDiscount(sale), subtotal);
+                sale.setAppliedPromotionName(bestPromotion.getName());
+                sale.setDiscountAmount(discount);
             }
-            if (productIdsWithExtendedWarranty != null && productIdsWithExtendedWarranty.contains(product.getId())) {
-                if (warrantyService != null) {
-                    com.gamezone.model.ExtendedWarranty ew = warrantyService.assignExtendedWarranty(product, sale, sale.getDate().toLocalDate());
-                    sale.addWarrantyCost(ew.getAdditionalCost());
-                }
-            }
-
-            if (item.getProduct() instanceof Accessory && accessoryService != null) {
-                accessoryService.updateStock(item.getProduct().getId(), -item.getQuantity());
-            } else {
-                productService.updateStock(item.getProduct().getId(), -item.getQuantity());
-            }
-
-
         }
 
+        // 4. Asignar garantía básica a cada consola y las extendidas solicitadas.
+        if (warrantyService != null) {
+            for (SalesLineItem item : sale.getItems()) {
+                Product product = item.getProduct();
+                if (product instanceof com.gamezone.model.Console) {
+                    warrantyService.assignBasicWarranty(product, sale, sale.getDate().toLocalDate());
 
-        // 4. Persist transaction in sales.txt
+                    if (productIdsWithExtendedWarranty != null && productIdsWithExtendedWarranty.contains(product.getId())) {
+                        com.gamezone.model.ExtendedWarranty ew = warrantyService.assignExtendedWarranty(product, sale, sale.getDate().toLocalDate());
+                        sale.addWarrantyCost(ew.getAdditionalCost());
+                    }
+                }
+            }
+        }
+
+        // 5. Actualizar inventario delegando en ProductService o AccessoryService.
+        for (SalesLineItem item : sale.getItems()) {
+            Product product = item.getProduct();
+            if (product instanceof Accessory && accessoryService != null) {
+                accessoryService.updateStock(product.getId(), -item.getQuantity());
+            } else {
+                productService.updateStock(product.getId(), -item.getQuantity());
+            }
+        }
+
+        // 6. Persistir la venta.
         saleRepository.save(sale);
     }
 

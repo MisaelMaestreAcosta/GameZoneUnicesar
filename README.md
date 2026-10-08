@@ -30,5 +30,5 @@ Sistema de información en Java para la gestión de la tienda de videojuegos Gam
 ### 🔗 System Integration (Integración del Sistema - Requerimiento 5)
 * **Unified Sales Flow:** Consolidates sales registration to handle products and accessories, apply the best promotion to the subtotal, compute warranty costs, and update respective inventories in a coordinated flow.
 * **Category Discount Integration:** Extends Category Discounts to be applicable specifically to Accessories.
-* **Integrated Returns & Refunds:** Accurately recalculates proportional refunds for items bought under a promotion, restores accessory stock, and automatically cancels warranties for returned consoles.
-* **Unified Financial Reports:** Generates an accurate monthly balance that integrates promotional discounts, extended warranty revenues, and valid returns.
+* **Integrated Returns & Refunds:** Accurately recalculates proportional refunds for items bought under a promotion. *(Note: Restoring accessory stock and automatically canceling warranties for returned consoles are pending implementation by other roles)*.
+* **Unified Financial Reports:** *(Pending implementation by other roles: Generates an accurate monthly balance that integrates promotional discounts, extended warranty revenues, and valid returns).*

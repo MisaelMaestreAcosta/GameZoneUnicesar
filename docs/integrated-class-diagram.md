@@ -232,31 +232,46 @@ classDiagram
     %% MODEL LAYER - SALE CLASS
     %% ============================================
     
+    class SalesLineItem {
+        - String productId
+        - String productName
+        - double unitPrice
+        - int quantity
+        - double subtotal
+        --
+        + SalesLineItem(productId, productName, unitPrice, quantity)
+        + String getProductId()
+        + String getProductName()
+        + double getUnitPrice()
+        + int getQuantity()
+        + double getSubtotal()
+    }
+
     class Sale {
         - String id
         - LocalDateTime date
         - Customer customer
         - Seller seller
-        - List~Product~ products
-        - List~Accessory~ accessories
+        - List~SalesLineItem~ items
         - String appliedPromotionName
         - double discountAmount
+        - double warrantyCost
         --
-        + Sale(id, date, customer, seller, products, accessories)
+        + Sale(id, date, customer, seller, items)
         + String getId()
         + LocalDateTime getDate()
         + Customer getCustomer()
         + Seller getSeller()
-        + List~Product~ getProducts()
-        + List~Accessory~ getAccessories()
+        + List~SalesLineItem~ getItems()
         + String getAppliedPromotionName()
         + void setAppliedPromotionName(String)
         + double getDiscountAmount()
         + void setDiscountAmount(double)
+        + double getWarrantyCost()
+        + void setWarrantyCost(double)
         + double calculateSubtotal()
         + double calculateTotal()
-        + void addProduct(Product)
-        + void addAccessory(Accessory)
+        + void addItem(SalesLineItem)
         + int getItemCount()
         + boolean canBeReturned()
         + String generateReceipt()
@@ -569,8 +584,8 @@ classDiagram
     
     Sale --> Customer : 1
     Sale --> Seller : 1
-    Sale --> Product : 1..*
-    Sale --> Accessory : 0..*
+    Sale --> SalesLineItem : 1..*
+    SalesLineItem --> Product : 1
     
     Customer --> Sale : 0..*
     Seller --> Sale : 0..*

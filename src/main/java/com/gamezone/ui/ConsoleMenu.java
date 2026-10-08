@@ -8,6 +8,7 @@ import com.gamezone.model.SalesLineItem;
 import com.gamezone.model.Seller;
 import com.gamezone.service.PersonService;
 
+
 import com.gamezone.service.ProductService;
 import com.gamezone.service.ReturnService;
 
@@ -16,15 +17,19 @@ import com.gamezone.service.SaleService;
 import com.gamezone.service.WarrantyService;
 import com.gamezone.model.Warranty;
 
-import com.gamezone.model.Accessory;
-import com.gamezone.service.AccessoryService;
-
-import java.util.Arrays;
 
 import com.gamezone.model.Accessory;
 import com.gamezone.service.AccessoryService;
 
 import java.util.Arrays;
+
+
+import com.gamezone.model.Accessory;
+import com.gamezone.service.AccessoryService;
+import com.gamezone.service.PromotionService;
+
+import java.util.Arrays;
+
 
 import java.util.ArrayList;
 
@@ -50,16 +55,17 @@ public class ConsoleMenu {
     private final ReturnService returnService;
 
     private final WarrantyService warrantyService;
+    private final PromotionService promotionService;
     private final Scanner scanner;
 
-    public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService,
-            AccessoryService accessoryService, ReturnService returnService, WarrantyService warrantyService) {
+    public ConsoleMenu(ProductService productService, PersonService personService, SaleService saleService, AccessoryService accessoryService, ReturnService returnService, WarrantyService warrantyService, PromotionService promotionService) {
         this.productService = productService;
         this.personService = personService;
         this.saleService = saleService;
         this.accessoryService = accessoryService;
         this.returnService = returnService;
         this.warrantyService = warrantyService;
+        this.promotionService= promotionService;
         this.scanner = new Scanner(System.in);
     }
 
@@ -80,6 +86,7 @@ public class ConsoleMenu {
             System.out.println("9. Gestión de Devoluciones");
             System.out.println("10. Gestión de Garantías");
             System.out.println("11. Consultar Balance Mensual");
+            System.out.println("12. Registrar promociones por categoria");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
 
@@ -97,6 +104,7 @@ public class ConsoleMenu {
                     case 9 -> handleReturnsMenu();
                     case 10 -> showWarrantyMenu();
                     case 11 -> showMonthlyBalance();
+                    case 12 -> registerCategoryPromotion();
                     case 0 -> System.out.println("Saliendo del sistema... ¡Hasta luego!");
                     default -> System.out.println("Opción inválida. Intente de nuevo.");
                 }
@@ -185,8 +193,10 @@ public class ConsoleMenu {
         if (customers.isEmpty()) {
             System.out.println("No hay clientes registrados.");
         } else {
-            customers.forEach(c -> System.out.printf("[%s] %s - Tel: %s | Rol: %s%n",
-                    c.getId(), c.getName(), c.getPhone(), c.getRoleDescription()));
+            customers.forEach(c ->
+                    System.out.printf("[%s] %s - Tel: %s | Rol: %s%n",
+                            c.getId(), c.getName(), c.getPhone(), c.getRoleDescription())
+            );
         }
 
         System.out.println("\n--- VENDEDORES ---");
@@ -194,8 +204,10 @@ public class ConsoleMenu {
         if (sellers.isEmpty()) {
             System.out.println("No hay vendedores registrados.");
         } else {
-            sellers.forEach(s -> System.out.printf("[%s] %s - Tel: %s | Rol: %s%n",
-                    s.getId(), s.getName(), s.getPhone(), s.getRoleDescription()));
+            sellers.forEach(s ->
+                    System.out.printf("[%s] %s - Tel: %s | Rol: %s%n",
+                            s.getId(), s.getName(), s.getPhone(), s.getRoleDescription())
+            );
         }
     }
 
@@ -238,15 +250,14 @@ public class ConsoleMenu {
                 continue;
             }
 
-            System.out.printf("Producto seleccionado: %s | Disponible: %d%n", product.getTitle(),
-                    product.getAvailability());
+            System.out.printf("Producto seleccionado: %s | Disponible: %d%n", product.getTitle(), product.getAvailability());
             System.out.print("Cantidad: ");
             int qty = Integer.parseInt(scanner.nextLine().trim());
 
             try {
                 sale.addLineItem(product, qty);
                 System.out.println("Producto agregado a la venta.");
-
+                
                 if (product instanceof com.gamezone.model.Console) {
                     System.out.print("Este producto es una consola. ¿Desea agregar Garantía Extendida? (s/n): ");
                     if (scanner.nextLine().trim().equalsIgnoreCase("s")) {
@@ -287,6 +298,7 @@ public class ConsoleMenu {
             sales = saleService.listAllSales(customers, sellers, products);
         }
 
+
         if (sales.isEmpty()) {
             System.out.println("No se han registrado ventas todavía.");
             return;
@@ -295,6 +307,7 @@ public class ConsoleMenu {
             System.out.println(s);
         }
     }
+
 
     private void showWarrantyMenu() {
         if (warrantyService == null) {
@@ -328,26 +341,20 @@ public class ConsoleMenu {
                     }
                     case 2 -> {
                         List<Warranty> all = warrantyService.listAllWarranties();
-                        if (all.isEmpty())
-                            System.out.println("No hay garantías registradas.");
-                        else
-                            all.forEach(w -> System.out.println(w.generateWarrantyCertificate()));
+                        if (all.isEmpty()) System.out.println("No hay garantías registradas.");
+                        else all.forEach(w -> System.out.println(w.generateWarrantyCertificate()));
                     }
                     case 3 -> {
                         List<Warranty> active = warrantyService.listActiveWarranties();
-                        if (active.isEmpty())
-                            System.out.println("No hay garantías vigentes hoy.");
-                        else
-                            active.forEach(w -> System.out.println(w.generateWarrantyCertificate()));
+                        if (active.isEmpty()) System.out.println("No hay garantías vigentes hoy.");
+                        else active.forEach(w -> System.out.println(w.generateWarrantyCertificate()));
                     }
                     case 4 -> {
                         System.out.print("Ingrese días de anticipación: ");
                         int days = Integer.parseInt(scanner.nextLine().trim());
                         List<Warranty> expiring = warrantyService.listWarrantiesExpiringSoon(days);
-                        if (expiring.isEmpty())
-                            System.out.println("No hay garantías próximas a vencer en ese plazo.");
-                        else
-                            expiring.forEach(w -> System.out.println(w.generateWarrantyCertificate()));
+                        if (expiring.isEmpty()) System.out.println("No hay garantías próximas a vencer en ese plazo.");
+                        else expiring.forEach(w -> System.out.println(w.generateWarrantyCertificate()));
                     }
                     case 0 -> System.out.println("Volviendo al menú principal...");
                     default -> System.out.println("Opción inválida.");
@@ -463,8 +470,7 @@ public class ConsoleMenu {
 
         if (accessoryService != null) {
 
-            accessoryService.registerController(id, title, price, stock, isWireless ? "Wireless" : "Wired",
-                    compatibleConsoles);
+            accessoryService.registerController(id, title, price, stock, isWireless ? "Wireless" : "Wired", compatibleConsoles);
 
             accessoryService.registerController(id, title, price, stock, connectionType, compatibleConsoles);
 
@@ -581,6 +587,7 @@ public class ConsoleMenu {
         }
     }
 
+
     /**
      * Guides the user through registering a new return transaction.
      */
@@ -589,6 +596,7 @@ public class ConsoleMenu {
         System.out.print("Ingrese el ID de la venta original: ");
         String saleId = scanner.nextLine().trim();
 
+
         Sale sale = getAllSalesInternal().stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
 
         if (sale == null) {
@@ -596,19 +604,19 @@ public class ConsoleMenu {
             return;
         }
 
+
         // TODO: Uncomment when canBeReturned is implemented by Desarrollador 1
         // if (!sale.canBeReturned()) {
-        // System.out.println("Error: La venta indicada supera los 30 días calendario
-        // permitidos para devoluciones.");
-        // return;
+        //     System.out.println("Error: La venta indicada supera los 30 días calendario permitidos para devoluciones.");
+        //     return;
         // }
 
-        long daysSinceSale = java.time.temporal.ChronoUnit.DAYS.between(sale.getDate().toLocalDate(),
-                java.time.LocalDate.now());
+        long daysSinceSale = java.time.temporal.ChronoUnit.DAYS.between(sale.getDate().toLocalDate(), java.time.LocalDate.now());
         if (daysSinceSale > 30) {
             System.out.println("Error: La venta indicada supera los 30 días calendario permitidos para devoluciones.");
             return;
         }
+
 
         System.out.println("\nVenta encontrada:");
         System.out.printf("Fecha de venta: %s | Cliente: %s (ID: %s)%n",
@@ -722,8 +730,7 @@ public class ConsoleMenu {
     }
 
     /**
-     * Prompts for month and year, then displays total sales, total returns, and net
-     * monthly balance.
+     * Prompts for month and year, then displays total sales, total returns, and net monthly balance.
      */
     private void showMonthlyBalance() {
         System.out.println("\n--- CONSULTA DE BALANCE MENSUAL ---");
@@ -742,9 +749,10 @@ public class ConsoleMenu {
 
             // Calculate components for detailed display
 
-            List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(),
-                    productService.listAllProducts());
+            List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
             double totalSales = allSales.stream()
+
+
 
                     .filter(s -> s.getDate().getYear() == year && s.getDate().getMonthValue() == month)
                     .mapToDouble(Sale::calculateTotal)
@@ -771,6 +779,47 @@ public class ConsoleMenu {
         } catch (Exception e) {
             System.out.println("Error al calcular el balance: " + e.getMessage());
 
+        }
+    }
+    private void registerCategoryPromotion() {
+        System.out.println("\n--- REGISTRAR PROMOCION POR CATEGORIA ---");
+
+        System.out.print("ID de la promocion: ");
+        String id = scanner.nextLine().trim();
+
+        System.out.print("Nombre: ");
+        String name = scanner.nextLine().trim();
+
+        System.out.print("Fecha de inicio (AAAA-MM-DD): ");
+        LocalDate startDate = LocalDate.parse(scanner.nextLine().trim());
+
+        System.out.print("Fecha de finalización (AAAA-MM-DD): ");
+        LocalDate endDate = LocalDate.parse(scanner.nextLine().trim());
+
+        System.out.print("Porcentaje de descuento: ");
+        double percentage = Double.parseDouble(scanner.nextLine().trim());
+
+        System.out.println("Categorias: 1. Videojuego  2. Consola  3. Accesorio");
+        System.out.print("Seleccione una categoria: ");
+
+        String category = switch (scanner.nextLine().trim()) {
+            case "1" -> "VIDEOGAME";
+            case "2" -> "CONSOLE";
+            case "3" -> "ACCESSORY";
+            default -> null;
+        };
+
+        if (category == null) {
+            System.out.println("Categoría invalida.");
+            return;
+        }
+
+        try {
+            promotionService.registerCategoryDiscount(
+                    id, name, startDate, endDate, percentage, category);
+            System.out.println("Promocion registrada correctamente.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("No se pudo registrar la promocion: " + e.getMessage());
         }
     }
 }
