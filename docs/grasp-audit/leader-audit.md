@@ -217,3 +217,22 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 | **Consequence** | The system is vulnerable to changes in collaborating modules. Adding new persistence mechanisms (e.g., database) or mocking components for unit testing is difficult. |
 | **Proposed Solution** | Introduce interface abstractions for repositories and service collaborators (or at minimum wrap volatile points of variation behind stable method contracts), shielding `SaleService` from implementation changes. |
 | **Other Member's Code** | Involves collaborators maintained by Developer 1 and Developer 2. |
+
+---
+
+## 3. Summary of Findings
+
+| Finding ID | Pattern | Status | Assigned Module | Boundary Finding? |
+| :--- | :--- | :--- | :--- | :--- |
+| `L-V01` | Information Expert | **Violation** | Returns Integration (Req 3) | Yes (with Developer 1 & 2) |
+| `L-V02` | Information Expert | **Violation** | Returns / Monthly Balance (Req 3) | Yes (with Developer 2) |
+| `L-V03` | Creator | **Violation** | Sales UI & Model (Workshop 1) | No (Leader code) |
+| `L-V04` | Controller | **Violation** | Sales Service (Workshop 1) | Yes (with Developer 1 & 2) |
+| `L-V05` | Low Coupling | **Violation** | Console UI (Cross-Module) | Yes (Cross-cutting) |
+| `L-V06` | Low Coupling | **Violation** | Sale Repository (Workshop 1) | Yes (with Developer 1 & 2) |
+| `L-V07` | High Cohesion | **Violation** | Console UI (Cross-Module) | No (Leader code) |
+| `L-V08` | High Cohesion | **Violation** | Product Service - restoreStock (Req 3) | Yes (with Developer 1) |
+| `L-V09` | Polymorphism | **Violation** | Sale Service (Req 1 & 4) | Yes (with Developer 1 & 2) |
+| `L-V10` | Polymorphism | **Violation** | Console UI (Req 4) | Yes (with Developer 1) |
+| `L-V11` | Indirection | **Violation** | Sales & Interface (Workshop 1 & Req 3) | Yes (with Developer 1 & 2) |
+| `L-V12` | Protected Variations | **Violation** | Sales Service (Workshop 1, 1, 2, 4) | Yes (with Developer 1 & 2) |
