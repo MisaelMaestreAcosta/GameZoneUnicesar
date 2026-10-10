@@ -119,3 +119,47 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 | **Consequence** | Ripple effect of changes: modifying a subsystem requires updating `ConsoleMenu`. `SaleRepository` cannot be used in isolation or tested independently without full preloaded collections. | Maintenance difficulty and high fragility across integration points. |
 | **Proposed Solution** | Group related operations or introduce Facade/Controller abstractions to reduce direct dependencies in `ConsoleMenu`. Decouple repository loading or pass repository/lookup helpers directly where appropriate. | Refactor `SaleRepository` and `SaleService` so that entity linking is handled without exposing list parameters across layers. |
 | **Other Member's Code** | Cross-cutting (all modules). | Touches `PersonService` (Developer 2) and `ProductService` (Developer 1). |
+
+---
+
+### 2.5 High Cohesion
+
+* **Verdict:** **Violation**
+
+#### Well-Applied Evidence
+* `SaleRepository.java` focuses strictly on disk persistence operations (`save` and `loadAll` in `sales.txt`), without mixing business validation or UI presentation.
+
+#### Identified Violations
+
+| Field | Finding L-V07 | Finding L-V08 |
+| :--- | :--- | :--- |
+| **ID** | `L-V07` | `L-V08` |
+| **Pattern** | High Cohesion | High Cohesion |
+| **Module** | Console UI (All Requirements) | Returns Integration (Requirement 3) |
+| **Evidence** | `ConsoleMenu.java` (826 lines total, handling console parsing, presentation, flow orchestration, return policy checks, and financial summary calculation). | `ProductService.java`, method `restoreStock(String, int)`, lines 92–106: <br>`void restoreStock(String productId, int quantity){ Product product = findById(productId); ... repository.saveAll(products); }` |
+| **Explanation** | `ConsoleMenu` suffers from low cohesion ("God Class" symptom in UI). It mixes menu loops, input scanning, domain validation rules, financial metric aggregations, and upsell logic. | `ProductService.restoreStock()` is an exact duplicate of `updateStock(String, int)` (lines 78–91), has package-private visibility, lacks JavaDoc, and splits stock management logic redundantly. |
+| **Consequence** | Comprehensibility and maintainability are severely degraded. Bugs in one submenu can break unrelated features. Duplicate stock methods introduce diverging maintenance paths. | Code duplication violates DRY and degrades cohesion of `ProductService`. |
+| **Proposed Solution** | Decompose `ConsoleMenu` into cohesive sub-handlers or menu presenters (e.g., `SalesView`, `ReturnView`). Eliminate `restoreStock` by delegating directly to `updateStock(productId, quantity)`. | Refactor `restoreStock` to call `updateStock` directly, or deprecate/remove the duplicate method after aligning with `ReturnService`. |
+| **Other Member's Code** | Touches all module entry points. | `ProductService` is maintained by Developer 1; method was added by Leader during Requirement 3. |
+
+---
+
+### 2.6 Polymorphism
+
+* **Verdict:** **Violation**
+
+#### Well-Applied Evidence
+* In `Sale.java`, polymorphism is respected when iterating over `SalesLineItem`: `item.calculateSubtotal()` is called uniformly regardless of product type.
+
+#### Identified Violations
+
+| Field | Finding L-V09 | Finding L-V10 |
+| :--- | :--- | :--- |
+| **ID** | `L-V09` | `L-V10` |
+| **Pattern** | Polymorphism | Polymorphism |
+| **Module** | Sales Service (Requirements 1 & 4) | Console UI (Requirement 4) |
+| **Evidence** | `SaleService.java`, method `registerSale()`, lines 73–77, 106–114, 120–124: <br>`if (item.getProduct() instanceof Accessory && accessoryService != null) { ... } else { ... }`<br>`if (product instanceof com.gamezone.model.Console) { ... }`<br>`if (product instanceof Accessory && accessoryService != null) { ... }` | `ConsoleMenu.java`, method `processNewSale()`, lines 261–266: <br>`if (product instanceof com.gamezone.model.Console) { System.out.print("Este producto es una consola. ¿Desea agregar Garantía Extendida? (s/n): "); ... }` |
+| **Explanation** | `SaleService` relies on conditional type checks (`instanceof Accessory`, `instanceof Console`) to handle divergent behavior for stock lookup, warranty applicability, and inventory decrement. This is an explicit violation of the Polymorphism pattern. | `ConsoleMenu` uses `instanceof Console` to conditionally display warranty prompts, hardcoding class hierarchy checks into UI flow rather than querying a polymorphic property. |
+| **Consequence** | Adding new product categories or warrantable items requires modifying `SaleService` and `ConsoleMenu` with additional conditional branches, violating the Open/Closed Principle. | The design is rigid and non-extensible for future catalog expansions. |
+| **Proposed Solution** | Treat `Accessory` uniformly through a common inventory/catalog contract, or delegate warranty eligibility check to the product hierarchy (e.g., `product.isWarrantable()`). | Polymorphically query product capabilities (e.g., `product.supportsWarranty()`) rather than checking `instanceof Console`. |
+| **Other Member's Code** | Requires Developer 1 (`Product`, `Console`) and Developer 2 (`Accessory`). | Requires Developer 1 (`Product`, `Console`). |
