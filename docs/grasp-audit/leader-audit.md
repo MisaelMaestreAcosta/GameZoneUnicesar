@@ -75,3 +75,47 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 | **Consequence** | The UI layer is tightly bound to the internal instantiation details and ID generation scheme of domain entities. |
 | **Proposed Solution** | Provide a method in `SaleService` (such as `createSale(Customer, Seller)`) that handles entity instantiation and identifier generation, shielding the UI from constructor dependencies. |
 | **Other Member's Code** | None (under Technical Leader's responsibility). |
+
+---
+
+### 2.3 Controller
+
+* **Verdict:** **Violation**
+
+#### Well-Applied Evidence
+* `com.gamezone.service.SaleService.registerSale(Sale, List<String>)` (lines 67–129): Acts as a Use Case Controller / Application Service orchestrating the transaction workflow: validating stock, evaluating promotions, assigning warranties, decrementing inventory, and persisting the record.
+
+#### Identified Violations
+
+| Field | Finding L-V04 |
+| :--- | :--- |
+| **ID** | `L-V04` |
+| **Pattern** | Controller |
+| **Module** | Sales, Interface & Startup (Workshop 1) |
+| **Evidence** | `SaleService.java`, lines 41–43: <br>`public Sale findById(String id) { return null; // Stub to satisfy compilation. Real implementation requires PersonService. }`<br>Forced workaround in `ConsoleMenu.java`, lines 282–287 and 599–600: <br>`Sale sale = getAllSalesInternal().stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);` |
+| **Explanation** | Because `SaleService` fails to fulfill its role as controller for sales queries (stubbed `findById`), `ConsoleMenu` is forced to act as a pseudo-controller: it coordinates retrieval across 3 services, executes in-memory filters, and manages transactional lookup logic. |
+| **Consequence** | The presentation layer assumes orchestration responsibilities that belong strictly to the application/service layer. |
+| **Proposed Solution** | Properly implement `findById(String id)` inside `SaleService` (by collaborating with `PersonService` and `ProductService`), allowing UI controllers to delegate sale lookups cleanly. |
+| **Other Member's Code** | Requires collaboration with `PersonService` (Developer 2) and `ProductService` (Developer 1). |
+
+---
+
+### 2.4 Low Coupling
+
+* **Verdict:** **Violation**
+
+#### Well-Applied Evidence
+* Decoupling of domain entities (`Sale`) from persistence mechanisms via `SaleRepository`. `Sale` has zero dependencies on `java.io` or file paths.
+
+#### Identified Violations
+
+| Field | Finding L-V05 | Finding L-V06 |
+| :--- | :--- | :--- |
+| **ID** | `L-V05` | `L-V06` |
+| **Pattern** | Low Coupling | Low Coupling |
+| **Module** | Console UI (Workshop 1 & Cross-Module) | Persistence (Workshop 1) |
+| **Evidence** | `ConsoleMenu.java`, constructor and attributes (lines 49–70): <br>`private final ProductService productService;`<br>`private final PersonService personService;`<br>`private final SaleService saleService;`<br>`private AccessoryService accessoryService;`<br>`private final ReturnService returnService;`<br>`private final WarrantyService warrantyService;`<br>`private final PromotionService promotionService;` | `SaleRepository.java`, method `loadAll()`, lines 90–91: <br>`public List<Sale> loadAll(List<Customer> customers, List<Seller> sellers, List<Product> products)` |
+| **Explanation** | `ConsoleMenu` is directly coupled to 7 different service implementations and several domain models, creating an excessively high coupling fan-out. Any change in any service constructor or method contract directly affects `ConsoleMenu`. | `SaleRepository` cannot deserialize a sale on its own; it forces the caller to load and provide collections of all customers, sellers, and products, tightly coupling repository methods to external domain collections. |
+| **Consequence** | Ripple effect of changes: modifying a subsystem requires updating `ConsoleMenu`. `SaleRepository` cannot be used in isolation or tested independently without full preloaded collections. | Maintenance difficulty and high fragility across integration points. |
+| **Proposed Solution** | Group related operations or introduce Facade/Controller abstractions to reduce direct dependencies in `ConsoleMenu`. Decouple repository loading or pass repository/lookup helpers directly where appropriate. | Refactor `SaleRepository` and `SaleService` so that entity linking is handled without exposing list parameters across layers. |
+| **Other Member's Code** | Cross-cutting (all modules). | Touches `PersonService` (Developer 2) and `ProductService` (Developer 1). |
