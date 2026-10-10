@@ -163,3 +163,57 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 | **Consequence** | Adding new product categories or warrantable items requires modifying `SaleService` and `ConsoleMenu` with additional conditional branches, violating the Open/Closed Principle. | The design is rigid and non-extensible for future catalog expansions. |
 | **Proposed Solution** | Treat `Accessory` uniformly through a common inventory/catalog contract, or delegate warranty eligibility check to the product hierarchy (e.g., `product.isWarrantable()`). | Polymorphically query product capabilities (e.g., `product.supportsWarranty()`) rather than checking `instanceof Console`. |
 | **Other Member's Code** | Requires Developer 1 (`Product`, `Console`) and Developer 2 (`Accessory`). | Requires Developer 1 (`Product`, `Console`). |
+
+---
+
+### 2.7 Pure Fabrication
+
+* **Verdict:** **Correct**
+
+#### Well-Applied Evidence
+* `com.gamezone.persistence.SaleRepository`: This class does not represent any real-world entity in the gaming domain. It was fabricated specifically to encapsulate low-level file I/O operations (`BufferedWriter`, `BufferedReader`, `sales.txt`), preventing the domain model (`Sale`) from being polluted with persistence infrastructure.
+* `com.gamezone.service.SaleService`: Fabricated as an application service to coordinate use-case workflows and inter-service dependencies without inflating domain entity responsibilities.
+
+---
+
+### 2.8 Indirection
+
+* **Verdict:** **Violation**
+
+#### Well-Applied Evidence
+* `SaleService` introduces an indirection layer between UI (`ConsoleMenu`) and persistence (`SaleRepository`) for recording transactions (`registerSale`), keeping the UI isolated from flat-file storage mechanisms.
+
+#### Identified Violations
+
+| Field | Finding L-V11 |
+| :--- | :--- |
+| **ID** | `L-V11` |
+| **Pattern** | Indirection |
+| **Module** | Sales & Interface (Workshop 1 & Requirement 3) |
+| **Evidence** | `ConsoleMenu.java`, lines 282–287, 292–299, 599–600: <br>`private List<Sale> getAllSalesInternal() { List<Customer> customers = personService.listCustomers(); List<Seller> sellers = personService.listSellers(); List<Product> products = productService.listAllProducts(); return saleService.listAllSales(customers, sellers, products); }` |
+| **Explanation** | The indirection provided by `SaleService` is broken for queries. Instead of acting as an intermediary that retrieves sales directly, `SaleService` forces `ConsoleMenu` to mediate between `PersonService`, `ProductService`, and `SaleService`, violating proper indirection. |
+| **Consequence** | Unnecessary indirection leakage: every caller wanting to display sales history or lookup a sale must know about and invoke three unrelated services. |
+| **Proposed Solution** | Allow `SaleService` to manage its own internal collaborator references to `PersonService` and `ProductService`, so `saleService.listAllSales()` and `saleService.findById()` can be called without intermediary parameter passing by the UI. |
+| **Other Member's Code** | Touches integration with `PersonService` (Developer 2) and `ProductService` (Developer 1). |
+
+---
+
+### 2.9 Protected Variations
+
+* **Verdict:** **Violation**
+
+#### Well-Applied Evidence
+* `Sale.getItems()` (line 130): Protects the internal state of the `Sale` entity from external mutations by returning an unmodifiable view: `Collections.unmodifiableList(items)`.
+
+#### Identified Violations
+
+| Field | Finding L-V12 |
+| :--- | :--- |
+| **ID** | `L-V12` |
+| **Pattern** | Protected Variations |
+| **Module** | Sales Service & Startup (Workshop 1 & Requirements 1, 2, 4) |
+| **Evidence** | `SaleService.java`, lines 22–27, 53: <br>`private final SaleRepository saleRepository;`<br>`private final ProductService productService;`<br>`private WarrantyService warrantyService;`<br>`private AccessoryService accessoryService;`<br>`private PromotionService promotionService;` |
+| **Explanation** | `SaleService` couples directly to concrete service and repository implementations rather than stable abstractions or interfaces. Any variation or substitution in inventory handling, warranty calculation, or persistence implementation forces direct modifications in `SaleService`. |
+| **Consequence** | The system is vulnerable to changes in collaborating modules. Adding new persistence mechanisms (e.g., database) or mocking components for unit testing is difficult. |
+| **Proposed Solution** | Introduce interface abstractions for repositories and service collaborators (or at minimum wrap volatile points of variation behind stable method contracts), shielding `SaleService` from implementation changes. |
+| **Other Member's Code** | Involves collaborators maintained by Developer 1 and Developer 2. |
