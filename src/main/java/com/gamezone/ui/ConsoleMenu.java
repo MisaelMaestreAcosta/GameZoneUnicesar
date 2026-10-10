@@ -39,6 +39,7 @@ import java.util.Scanner;
 import java.util.UUID;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import com.gamezone.exceptions.*;
 
 /**
  * Text-based console interface providing interactive menus for catalog, sales,
@@ -110,8 +111,16 @@ public class ConsoleMenu {
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Error: Por favor ingrese un número válido.");
+            } catch (ResourceNotFoundException e) {
+                System.out.println("No se encontró el recurso solicitado: " + e.getMessage());
+            } catch (BusinessRuleException e) {
+                System.out.println("No se puede completar la operación: " + e.getMessage());
+            } catch (InvalidDataException e) {
+                System.out.println("Los datos ingresados no son válidos: " + e.getMessage());
+            } catch (PersistenceException e) {
+                System.out.println("Ocurrió un problema al acceder a los datos del sistema. Contacte al administrador.");
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                System.out.println("Error inesperado: " + e.getMessage());
             }
         } while (option != 0);
     }
@@ -361,8 +370,16 @@ public class ConsoleMenu {
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Error: Por favor ingrese un número válido.");
+            } catch (ResourceNotFoundException e) {
+                System.out.println("No se encontró el recurso solicitado: " + e.getMessage());
+            } catch (BusinessRuleException e) {
+                System.out.println("No se puede completar la operación: " + e.getMessage());
+            } catch (InvalidDataException e) {
+                System.out.println("Los datos ingresados no son válidos: " + e.getMessage());
+            } catch (PersistenceException e) {
+                System.out.println("Ocurrió un problema al acceder a los datos del sistema. Contacte al administrador.");
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                System.out.println("Error inesperado: " + e.getMessage());
             }
         } while (option != 0);
     }
@@ -397,8 +414,16 @@ public class ConsoleMenu {
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Error: Por favor ingrese un número válido.");
+            } catch (ResourceNotFoundException e) {
+                System.out.println("No se encontró el recurso solicitado: " + e.getMessage());
+            } catch (BusinessRuleException e) {
+                System.out.println("No se puede completar la operación: " + e.getMessage());
+            } catch (InvalidDataException e) {
+                System.out.println("Los datos ingresados no son válidos: " + e.getMessage());
+            } catch (PersistenceException e) {
+                System.out.println("Ocurrió un problema al acceder a los datos del sistema. Contacte al administrador.");
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                System.out.println("Error inesperado: " + e.getMessage());
             }
 
         } while (option != 0);
@@ -440,8 +465,16 @@ public class ConsoleMenu {
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Error: Por favor ingrese un número válido.");
+            } catch (ResourceNotFoundException e) {
+                System.out.println("No se encontró el recurso solicitado: " + e.getMessage());
+            } catch (BusinessRuleException e) {
+                System.out.println("No se puede completar la operación: " + e.getMessage());
+            } catch (InvalidDataException e) {
+                System.out.println("Los datos ingresados no son válidos: " + e.getMessage());
+            } catch (PersistenceException e) {
+                System.out.println("Ocurrió un problema al acceder a los datos del sistema. Contacte al administrador.");
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                System.out.println("Error inesperado: " + e.getMessage());
             }
 
         } while (subOption != 0);
@@ -668,7 +701,15 @@ public class ConsoleMenu {
             Return processedReturn = returnService.registerReturn(saleId, productIdsToReturn, reason);
             System.out.println("\n¡Devolución registrada exitosamente!");
             System.out.println(processedReturn.generateReturnReceipt());
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException e) {
+            System.out.println("No se encontró el recurso solicitado: " + e.getMessage());
+        } catch (BusinessRuleException e) {
+            System.out.println("No se puede completar la operación: " + e.getMessage());
+        } catch (InvalidDataException e) {
+            System.out.println("Los datos ingresados no son válidos: " + e.getMessage());
+        } catch (PersistenceException e) {
+            System.out.println("Ocurrió un problema al acceder a los datos del sistema. Contacte al administrador.");
+        } catch (Exception e) {
             System.out.println("Error al procesar la devolución: " + e.getMessage());
         }
     }
@@ -776,6 +817,14 @@ public class ConsoleMenu {
 
         } catch (NumberFormatException e) {
             System.out.println("Error: Ingrese valores numéricos válidos para mes y año.");
+        } catch (ResourceNotFoundException e) {
+            System.out.println("No se encontró el recurso solicitado: " + e.getMessage());
+        } catch (BusinessRuleException e) {
+            System.out.println("No se puede completar la operación: " + e.getMessage());
+        } catch (InvalidDataException e) {
+            System.out.println("Los datos ingresados no son válidos: " + e.getMessage());
+        } catch (PersistenceException e) {
+            System.out.println("Ocurrió un problema al acceder a los datos del sistema. Contacte al administrador.");
         } catch (Exception e) {
             System.out.println("Error al calcular el balance: " + e.getMessage());
 
