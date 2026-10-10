@@ -39,6 +39,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Violation**
 
 #### Well-Applied Evidence
+
 * `com.gamezone.model.Sale.calculateSubtotal()` (lines 61–67) and `calculateTotal()` (lines 74–76): `Sale` holds the collection of `SalesLineItem`, the discount amount, and warranty costs. It properly aggregates subtotals and delegates item price computation to `SalesLineItem.calculateSubtotal()` (lines 30–32), which possesses the item's unit price and quantity.
 
 #### Identified Violations
@@ -61,6 +62,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Violation**
 
 #### Well-Applied Evidence
+
 * `com.gamezone.model.Sale.addLineItem(Product, int)` (lines 49–54): `Sale` aggregates, records, and closely uses `SalesLineItem`. Hence, `Sale` directly creates instances of `SalesLineItem`: `this.items.add(new SalesLineItem(product, quantity));`.
 
 #### Identified Violations
@@ -83,6 +85,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Violation**
 
 #### Well-Applied Evidence
+
 * `com.gamezone.service.SaleService.registerSale(Sale, List<String>)` (lines 67–129): Acts as a Use Case Controller / Application Service orchestrating the transaction workflow: validating stock, evaluating promotions, assigning warranties, decrementing inventory, and persisting the record.
 
 #### Identified Violations
@@ -105,6 +108,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Violation**
 
 #### Well-Applied Evidence
+
 * Decoupling of domain entities (`Sale`) from persistence mechanisms via `SaleRepository`. `Sale` has zero dependencies on `java.io` or file paths.
 
 #### Identified Violations
@@ -127,6 +131,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Violation**
 
 #### Well-Applied Evidence
+
 * `SaleRepository.java` focuses strictly on disk persistence operations (`save` and `loadAll` in `sales.txt`), without mixing business validation or UI presentation.
 
 #### Identified Violations
@@ -149,6 +154,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Violation**
 
 #### Well-Applied Evidence
+
 * In `Sale.java`, polymorphism is respected when iterating over `SalesLineItem`: `item.calculateSubtotal()` is called uniformly regardless of product type.
 
 #### Identified Violations
@@ -171,6 +177,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Correct**
 
 #### Well-Applied Evidence
+
 * `com.gamezone.persistence.SaleRepository`: This class does not represent any real-world entity in the gaming domain. It was fabricated specifically to encapsulate low-level file I/O operations (`BufferedWriter`, `BufferedReader`, `sales.txt`), preventing the domain model (`Sale`) from being polluted with persistence infrastructure.
 * `com.gamezone.service.SaleService`: Fabricated as an application service to coordinate use-case workflows and inter-service dependencies without inflating domain entity responsibilities.
 
@@ -181,6 +188,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Violation**
 
 #### Well-Applied Evidence
+
 * `SaleService` introduces an indirection layer between UI (`ConsoleMenu`) and persistence (`SaleRepository`) for recording transactions (`registerSale`), keeping the UI isolated from flat-file storage mechanisms.
 
 #### Identified Violations
@@ -203,6 +211,7 @@ In accordance with Section 4 of the Requirement 7 specification (*Responsabilida
 * **Verdict:** **Violation**
 
 #### Well-Applied Evidence
+
 * `Sale.getItems()` (line 130): Protects the internal state of the `Sale` entity from external mutations by returning an unmodifiable view: `Collections.unmodifiableList(items)`.
 
 #### Identified Violations
