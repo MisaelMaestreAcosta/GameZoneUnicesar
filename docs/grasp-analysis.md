@@ -35,6 +35,7 @@ The team established uniform evaluation criteria based on the fundamental questi
 ### 1.2 Minimum Evidence Required for Consolidation
 
 To ensure objectivity and audit validity, every finding admitted into the consolidated report must contain:
+
 * **Traceable Location:** Exact class, method name, and line numbers matching the baseline commit of `develop` (`1c94b3f`).
 * **Code Extract:** Verbatim snippet of the audited source code illustrating the violation or positive application.
 * **Architectural Rationale:** Precise explanation linking the code snippet to the violated GRASP principle.
@@ -53,6 +54,7 @@ To ensure objectivity and audit validity, every finding admitted into the consol
 The team identified three prominent boundary violations where responsibilities collided across member modules:
 
 #### Concrete Case 1: Return Window Validation vs. `Sale.canBeReturned()`
+
 * **Boundary:** Technical Leader (`ConsoleMenu.java`) $\leftrightarrow$ Developer 1 (`Sale.java`).
 * **Finding Details:** In `ConsoleMenu.processNewReturn()` (lines 614–618), the UI calculates whether a transaction is within the 30-day return policy using `ChronoUnit.DAYS.between(sale.getDate().toLocalDate(), LocalDate.now()) > 30`. This occurred because `Sale.canBeReturned()` (line 87) remained an incomplete stub in Developer 1's code (`return true;`).
 * **Pattern Violated:** Information Expert.
@@ -61,6 +63,7 @@ The team identified three prominent boundary violations where responsibilities c
   * **Technical Leader:** Refactors `ConsoleMenu.java` and `ReturnService` integration to invoke `sale.canBeReturned()` polymorphically, stripping date arithmetic from the UI.
 
 #### Concrete Case 2: Warranty Eligibility Checking via `instanceof Console`
+
 * **Boundary:** Technical Leader (`SaleService.java`, `ConsoleMenu.java`) $\leftrightarrow$ Developer 1 (`Product.java`, `Console.java`).
 * **Finding Details:** In `SaleService.registerSale()` (lines 106–114) and `ConsoleMenu.processNewSale()` (line 261), hardcoded checks (`product instanceof Console`) are performed to offer and attach warranties.
 * **Pattern Violated:** Polymorphism and Low Coupling.
@@ -69,6 +72,7 @@ The team identified three prominent boundary violations where responsibilities c
   * **Technical Leader:** Eliminates `instanceof Console` branching from `SaleService` and `ConsoleMenu`, querying the polymorphic property uniformly.
 
 #### Concrete Case 3: Monthly Balance Financial Calculations in UI
+
 * **Boundary:** Technical Leader (`ConsoleMenu.java`) $\leftrightarrow$ Developer 2 (`ReturnService.java`).
 * **Finding Details:** In `ConsoleMenu.showMonthlyBalance()` (lines 752–765), the UI queries all sales and all returns, streams over them, and calculates monthly total sales and return subtotals directly, bypassing `ReturnService.generateMonthlyBalance()`.
 * **Pattern Violated:** Information Expert and High Cohesion.
