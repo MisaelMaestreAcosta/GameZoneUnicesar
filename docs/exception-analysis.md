@@ -28,4 +28,4 @@
 
 *Question: ConsoleMenu used to catch a single generic exception. Now it must catch four distinct types. Should this be done with a single try block with multiple catches, cascading catches, or a general catch(GameZoneException)? Justify the choice considering code clarity and differentiated user messages.*
 
-(Answer here)
+(The best option is to use a single `try` block with multiple `catch` blocks—one for each custom exception. This keeps the code centralized and easy to read, and allows each type of error to display a different message to the user.)
