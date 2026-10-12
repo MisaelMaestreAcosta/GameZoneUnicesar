@@ -6,13 +6,13 @@ import com.gamezone.exceptions.ResourceNotFoundException;
 import com.gamezone.model.Person;
 import java.util.List;
 
-/** Centraliza las validaciones de datos e identidad de clientes y vendedores. */
+/** Centralizes data and identity validation for customers and sellers. */
 public final class PersonValidator {
 
     private PersonValidator() {
     }
 
-    /** Valida los datos de una persona y el formato básico del correo opcional. */
+    /** Validates a person's data and the basic format of the optional email address. */
     public static void validatePersonData(String id, String name, String email, String phone) {
         if (id == null || id.isBlank()) {
             throw new InvalidDataException("identificador", "no puede estar vacío");
@@ -29,14 +29,14 @@ public final class PersonValidator {
         }
     }
 
-    /** Comprueba que la persona solicitada exista. */
+    /** Verify that the requested person exists. */
     public static void validatePersonExists(Person person, String personId) {
         if (person == null) {
             throw new ResourceNotFoundException("persona", personId);
         }
     }
 
-    /** Impide registrar otra persona con un identificador ya utilizado. */
+    /** Prevents registering another person with an identifier that is already in use. */
     public static void validateUniquePerson(List<Person> existing, String newId) {
         if (newId == null || newId.isBlank()) {
             throw new InvalidDataException("identificador", "no puede estar vacío");
