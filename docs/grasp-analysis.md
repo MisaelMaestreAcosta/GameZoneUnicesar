@@ -84,13 +84,17 @@ The team identified three prominent boundary violations where responsibilities c
 
 ## Question 3: Related Patterns and Multi-Pattern Violations
 
-> *(To be completed by Developer 1 / Developer 2)*
+> - **D2-V01:** inline validation in `PersonService` breaks High Cohesion and also Indirection (no validator between the service and the rules). It is recorded once under High Cohesion with an Indirection cross-reference, and High Cohesion guides the fix because it explains the root cause (two responsibilities in one class).
+- **D2-V05:** filtering by `getClass().getSimpleName()` breaks Protected Variations and relates to Polymorphism (`D2-V04`). It is recorded once under Protected Variations, and the same type key from the serializers fixes both.
+- **D2-V11:** Low Coupling with an Indirection cross-reference, guided by Low Coupling.
+- **D2-V18:** Protected Variations with a High Cohesion cross-reference (`D2-V01`).
 
 ---
 
 ## Question 4: Non-Regression Verification Strategy
 
-> *(To be completed by Developer 1 / Developer 2)*
+> Before the first correction, I run every menu operation on `develop` with fixed input data and save the console output and a copy of the `data/*.txt` files as the reference result. After each correction, and in each Pull Request, I repeat the same operations on the affected modules and compare console output and file content line by line. At the end, I repeat the full run over all menu operations. The evidence is the before/after comparison recorded in `docs/grasp-refactor-log.md`, plus `mvn clean compile` passing.
+
 
 ---
 
