@@ -2,8 +2,9 @@
 
 | Clase | Variación Implementada | ID de Variación | Principio de Diseño | Commit / PR | Responsable |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **AccessoryRepository** | File path injected through constructor, default path preserved | V-XX | Protected Variations | `<hash>` / PR #N | Developer 2 |
-| **PersonRepository** | Paths injected through constructor, defaults kept | V-XX | Protected Variations | `<hash>` / PR #N | Developer 2 |
+| **AccessoryRepository** | File path injected through constructor, default path preserved | D2-V03 | Protected Variations | `<hash>` / PR #N | Developer 2 |
+| **PersonRepository** | Paths injected through constructor, defaults kept | D2-V06 | Protected Variations | `<hash>` / PR #N | Developer 2 |
+| **PromotionRepository** | File path injected through constructor, default path preserved | D2-V08 | Protected Variations | `<hash>` / PR #N | Developer 2 |
 
 \## Non-regression strategy
 
@@ -14,17 +15,6 @@
 \## Baseline result (develop, before the first correction)
 
 <result of the initial verification>
-
-
-
-\## Change log
-
-| `PersonRepository` | Paths injected through constructor, defaults kept | D2-V03 | Protected Variations | <hash> / PR #N | Developer 2 |
-
-| Class | Change made | Violation ID | Pattern applied | Commit / PR | Responsible |
-
-| :--- | :--- | :--- | :--- | :--- | :--- |
-
 
 
 \## Out-of-scope findings
