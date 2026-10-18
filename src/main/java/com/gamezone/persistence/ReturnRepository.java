@@ -27,17 +27,17 @@ import java.util.List;
  */
 public class ReturnRepository {
 
-    private static final String FILE_PATH = "data/returns.txt";
     private static final String FIELD_DELIMITER = ",";
     private static final String LIST_DELIMITER = "\\|";
 
     private final SaleService saleService;
     private final ProductService productService;
     private final PersonService personService;
+    private final String filePath;
 
     /**
      * Creates the repository with the services needed to resolve sale and
-     * product references while loading returns from the text file.
+     * product references while loading returns from the default text file.
      *
      * @param saleService    used to look up the original sale by id
      * @param productService used to look up returned products by id
@@ -45,9 +45,24 @@ public class ReturnRepository {
      *                       by SaleService to reconstruct sales
      */
     public ReturnRepository(SaleService saleService, ProductService productService, PersonService personService) {
+        this(saleService, productService, personService, "data/returns.txt");
+    }
+
+    /**
+     * Creates the repository using the given file.
+     *
+     * @param saleService    used to look up the original sale by id
+     * @param productService used to look up returned products by id
+     * @param personService  used to obtain the customers and sellers needed
+     *                       by SaleService to reconstruct sales
+     * @param filePath       path of the returns file
+     */
+    public ReturnRepository(SaleService saleService, ProductService productService,
+                            PersonService personService, String filePath) {
         this.saleService = saleService;
         this.productService = productService;
         this.personService = personService;
+        this.filePath = filePath;
     }
 
     /**
@@ -56,7 +71,7 @@ public class ReturnRepository {
      * @param returns the returns to persist
      */
     public void saveAll(List<Return> returns) {
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
             parent.mkdirs();
@@ -80,7 +95,7 @@ public class ReturnRepository {
      */
     public List<Return> loadAll() {
         List<Return> returns = new ArrayList<>();
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
 
         if (!file.exists()) {
             return returns;
