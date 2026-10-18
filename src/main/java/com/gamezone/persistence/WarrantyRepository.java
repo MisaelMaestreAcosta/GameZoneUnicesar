@@ -23,19 +23,37 @@ import java.util.List;
  */
 public class WarrantyRepository {
 
-    private static final String FILE_PATH = "data/warranties.txt";
     private static final String FIELD_DELIMITER = ",";
 
     private final SaleService saleService;
     private final ProductService productService;
+    private final String filePath;
 
+    /**
+     * Creates a repository that uses the default warranties file.
+     *
+     * @param saleService    used to look up sales by id
+     * @param productService used to look up products by id
+     */
     public WarrantyRepository(SaleService saleService, ProductService productService) {
+        this(saleService, productService, "data/warranties.txt");
+    }
+
+    /**
+     * Creates a repository that reads and writes the given file.
+     *
+     * @param saleService    used to look up sales by id
+     * @param productService used to look up products by id
+     * @param filePath       path of the warranties file
+     */
+    public WarrantyRepository(SaleService saleService, ProductService productService, String filePath) {
         this.saleService = saleService;
         this.productService = productService;
+        this.filePath = filePath;
     }
 
     public void saveAll(List<Warranty> warranties) {
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
             parent.mkdirs();
@@ -53,7 +71,7 @@ public class WarrantyRepository {
 
     public List<Warranty> loadAll() {
         List<Warranty> warranties = new ArrayList<>();
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
 
         if (!file.exists()) {
             return warranties;
