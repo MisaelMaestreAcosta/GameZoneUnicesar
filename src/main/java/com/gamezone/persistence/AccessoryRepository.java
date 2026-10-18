@@ -21,9 +21,26 @@ import java.util.List;
  */
 public class AccessoryRepository {
 
-    private static final String FILE_PATH = "data/accessories.txt";
     private static final String FIELD_DELIMITER = ",";
     private static final String LIST_DELIMITER = "\\|";
+
+    private final String filePath;
+
+    /**
+     * Creates a repository that uses the default accessories file.
+     */
+    public AccessoryRepository() {
+        this("data/accessories.txt");
+    }
+
+    /**
+     * Creates a repository that reads and writes the given file.
+     *
+     * @param filePath path of the accessories file
+     */
+    public AccessoryRepository(String filePath) {
+        this.filePath = filePath;
+    }
 
     /**
      * Persists all accessories to the TXT file.
@@ -31,7 +48,7 @@ public class AccessoryRepository {
      * @param accessories list of accessories to save
      */
     public void saveAll(List<Accessory> accessories) {
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
             parent.mkdirs();
@@ -54,7 +71,7 @@ public class AccessoryRepository {
      */
     public List<Accessory> loadAll() {
         List<Accessory> accessories = new ArrayList<>();
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
 
         if (!file.exists()) {
             return accessories;
