@@ -8,6 +8,7 @@
 | **ReturnRepository** | File path injected through constructor, default path preserved | D2-V14 | Protected Variations | `<hash>` / PR #4 | Developer 2 |
 | **WarrantyRepository** | File path injected through constructor, default path preserved | D2-V17 | Protected Variations | `<hash>` / PR #5 | Developer 2 |
 
+completar
 \## Non-regression strategy
 
 <the Technical Leader documents which menu operations are verified, with which input data and the expected result>
