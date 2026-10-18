@@ -16,21 +16,40 @@ import java.util.logging.Logger;
 public class PersonRepository {
 
     private static final Logger LOGGER = Logger.getLogger(PersonRepository.class.getName());
-    private static final Path CUSTOMERS_PATH = Paths.get("data", "customers.txt");
-    private static final Path SELLERS_PATH = Paths.get("data", "sellers.txt");
     private static final String DELIMITER = ",";
+
+    private final Path customersPath;
+    private final Path sellersPath;
+
+    /**
+     * Creates a repository that uses the default data files.
+     */
+    public PersonRepository() {
+        this(Paths.get("data", "customers.txt"), Paths.get("data", "sellers.txt"));
+    }
+
+    /**
+     * Creates a repository that reads and writes the given files.
+     *
+     * @param customersPath path of the customers file
+     * @param sellersPath   path of the sellers file
+     */
+    public PersonRepository(Path customersPath, Path sellersPath) {
+        this.customersPath = customersPath;
+        this.sellersPath = sellersPath;
+    }
 
     public void saveCustomers(List<Customer> customers) {
         List<String> lines = new ArrayList<>();
         for (Customer c : customers) {
             lines.add(String.join(DELIMITER, c.getName(), c.getId(), c.getPhone(), c.getEmail()));
         }
-        writeToFile(CUSTOMERS_PATH, lines);
+        writeToFile(customersPath, lines);
     }
 
     public List<Customer> loadCustomers() {
         List<Customer> customers = new ArrayList<>();
-        List<String> lines = readAllLines(CUSTOMERS_PATH);
+        List<String> lines = readAllLines(customersPath);
 
         for (String line : lines) {
             String[] parts = line.split(DELIMITER);
@@ -46,16 +65,16 @@ public class PersonRepository {
         for (Seller s : sellers) {
             lines.add(String.join(DELIMITER, s.getName(), s.getId(), s.getPhone(), s.getEmployeeCode(), s.getShift()));
         }
-        writeToFile(SELLERS_PATH, lines);
+        writeToFile(sellersPath, lines);
     }
 
     public List<Seller> loadSellers() {
-        if (!Files.exists(SELLERS_PATH)) {
+        if (!Files.exists(sellersPath)) {
             return initializeDefaultSellers();
         }
 
         List<Seller> sellers = new ArrayList<>();
-        List<String> lines = readAllLines(SELLERS_PATH);
+        List<String> lines = readAllLines(sellersPath);
 
         for (String line : lines) {
             String[] parts = line.split(DELIMITER);
@@ -65,7 +84,6 @@ public class PersonRepository {
         }
         return sellers;
     }
-
 
     private void writeToFile(Path path, List<String> lines) {
         try {
