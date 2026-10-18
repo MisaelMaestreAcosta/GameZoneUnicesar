@@ -48,9 +48,21 @@
 
 \### 2.1 Information Expert
 
+#### Identified Violations
+
+| Field | Finding D2-V12 |
+| :--- | :--- |
+| **ID** | `D2-V12` |
+| **Pattern** | Information Expert |
+| **Module** | Returns (Requirement 3) |
+| **Evidence** | `ReturnService.registerReturn()` computes `ChronoUnit.DAYS.between(sale.getDate().toLocalDate(), LocalDate.now())` and compares it with `RETURN_WINDOW_DAYS`. |
+| **Explanation** | The return-eligibility rule is computed from data owned by `Sale` (its date), but it lives in the service. The class comment states the check is done here because `Sale.canBeReturned()` is not exposed. ⚠️ Confirm in your repo whether `Sale.canBeReturned()` exists; Developer 1's audit lists it. |
+| **Consequence** | The rule can exist in two places (`Sale` and `ReturnService`) and diverge. |
+| **Proposed Solution** | Have `ReturnService` ask `Sale.canBeReturned()` and let `Sale` own the rule, keeping the 30-day window and the same message. |
+| **Other Member's Code** | Yes. `Sale.canBeReturned()` belongs to Developer 1; coordinate through the Technical Leader. |
 
 
-\* \*\*Verdict:\*\* \*\*Correct\*\*
+\* \*\*Verdict:\*\* \*\*Violation\*\*
 
 
 
@@ -64,6 +76,7 @@
 
 `PromotionService.findBestPromotionFor()` delegates the discount computation to each 
 `Promotion.calculateDiscount(Sale)` and `Promotion.isActive()`, which hold the rules, and only compares the results.
+
 
 \### 2.2 Creator
 
@@ -83,6 +96,9 @@
 
 `PromotionRepository.fromTextLine()` creates the promotion subclasses because it holds the file data. `PromotionService.registerPercentageDiscount()` and `registerBulkPurchaseDiscount()` create the promotions and manage the collection.
 
+`ReturnService.registerReturn()` creates the `Return` because it has the sale, products and reason. `ReturnRepository.fromTextLine()` creates `Return` objects from file data.
+
+
 \### 2.3 Controller
 
 
@@ -100,11 +116,36 @@
 
 `PromotionService` coordinates register, list, find and best-promotion selection, and delegates persistence to `PromotionRepository`.
 
+`ReturnService` coordinates registration, queries, stock restoration and balance, and delegates persistence to `ReturnRepository`.
+
+
 \### 2.4 Low Coupling
 
+#### Identified Violations
 
+| Field | Finding D2-V10 |
+| :--- | :--- |
+| **ID** | `D2-V10` |
+| **Pattern** | Low Coupling |
+| **Module** | Returns (Requirement 3) |
+| **Evidence** | `ReturnRepository` (persistence layer) imports and receives `SaleService`, `ProductService` and `PersonService` through its constructor, and `loadAll()` calls `saleService.listAllSales(...)` and `productService.findById()`. |
+| **Explanation** | The persistence layer depends on the service layer, against the dependency direction ui → service → persistence → model. It also creates a cycle: `ReturnService` → `ReturnRepository` → `SaleService`/`ProductService`/`PersonService`. |
+| **Consequence** | `ReturnRepository` cannot be built or tested without three services, and any change in their APIs breaks persistence. |
+| **Proposed Solution** | Make `ReturnRepository` read and write only identifiers, with no service dependency, and have `ReturnService` resolve the sale and products when loading. File content and behavior stay identical. |
+| **Other Member's Code** | No. The correction only touches Developer 2's `ReturnRepository` and `ReturnService`. |
 
-\* \*\*Verdict:\*\* \*\*Correct\*\*
+| Field | Finding D2-V11 |
+| :--- | :--- |
+| **ID** | `D2-V11` |
+| **Pattern** | Low Coupling (cross-reference: Indirection) |
+| **Module** | Returns (Requirement 3) |
+| **Evidence** | `ReturnService.findSaleById()` and `generateMonthlyBalance()` both call `saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts())`. |
+| **Explanation** | `ReturnService` depends on `PersonService` and `ProductService` only to feed arguments to `SaleService`, and rebuilds every sale for each lookup. |
+| **Consequence** | A change in how sales are reconstructed forces changes in `ReturnService`, and each lookup does unnecessary work. |
+| **Proposed Solution** | Let `SaleService` expose a lookup that resolves its own collaborators (Indirection), and have `ReturnService` depend only on `SaleService`. Results stay identical. |
+| **Other Member's Code** | Yes. `SaleService` belongs to the Technical Leader; this is a boundary finding. |
+
+\* \*\*Verdict:\*\* \*\*Violation\*\*
 
 
 
@@ -119,9 +160,19 @@
 
 `PromotionService` receives `PromotionRepository` through its constructor, and the promotion model classes perform no file I/O.
 
+
 \### 2.5 High Cohesion
 
-
+| Field | Finding D2-V13 |
+| :--- | :--- |
+| **ID** | `D2-V13` |
+| **Pattern** | High Cohesion |
+| **Module** | Returns (Requirement 3) |
+| **Evidence** | `ReturnService` contains `registerReturn()` (validation, stock restoration, persistence), the query methods (`viewAllReturns`, `viewReturnsByCustomer`, `viewReturnsBySale`) and `generateMonthlyBalance()`, which sums sales and refunds. |
+| **Explanation** | Monthly balance reporting is a financial calculation over sales, unrelated to registering and querying returns. |
+| **Consequence** | Changing the balance rules means editing the return-registration service, which also forces it to depend on `PersonService` and `ProductService`. |
+| **Proposed Solution** | Move `generateMonthlyBalance()` to a dedicated class (Pure Fabrication), keeping the same formula and results. |
+| **Other Member's Code** | `ConsoleMenu` (Technical Leader) calls the balance; coordinate if its call site changes. |
 
 \* \*\*Verdict:\*\* \*\*Violation\*\*
 
@@ -185,14 +236,6 @@
 | **Other Member's Code** | No other member's code is required. |
 
 
-\### 2.6 Polymorphism
-
-
-
-\* \*\*Verdict:\*\* \*\*Violation\*\*
-
-
-
 ### 2.6 Polymorphism
 
 * **Verdict:** **Violation**
@@ -200,6 +243,8 @@
 #### Well-Applied Evidence
 
 * `Person.getRoleDescription()` is abstract and overridden in `Customer` and `Seller`, so no type checks are needed to describe a person.
+
+* (Returns) No type variants exist in the returns module, so no conditionals on type appear in `ReturnService` or `ReturnRepository`.
 
 #### Identified Violations
 
@@ -236,13 +281,13 @@
 
 \#### Well-Applied Evidence
 
-
-
 \* `PersonRepository` encapsulates flat-file persistence so the domain classes stay free of I/O.
 
 `AccessoryRepository` encapsulates flat-file persistence for accessories.
 
 `PromotionRepository` encapsulates flat-file persistence for promotions.
+
+`ReturnRepository` encapsulates flat-file persistence for returns.
 
 \### 2.8 Indirection
 
@@ -261,9 +306,21 @@
 
 `PromotionRepository` mediates between `PromotionService` and `data/promotions.txt`.
 
+`ReturnRepository` mediates between `ReturnService` and `data/returns.txt`; `ReturnService` uses `ProductService.restoreStock()` instead of touching product stock directly. The coupling overlap is recorded once, in `D2-V10` and `D2-V11`.
+
+
 \### 2.9 Protected Variations
 
-
+| Field | Finding D2-V14 |
+| :--- | :--- |
+| **ID** | `D2-V14` |
+| **Pattern** | Protected Variations |
+| **Module** | Returns (Requirement 3) |
+| **Evidence** | `ReturnRepository` fixes `FILE_PATH`, `FIELD_DELIMITER` and `LIST_DELIMITER` as `static final` constants; `ReturnService` fixes `RETURN_WINDOW_DAYS = 30` as a private constant. |
+| **Explanation** | The storage location and format, and the return window, cannot vary without editing the classes. |
+| **Consequence** | A policy change (for example, a different return window) or a testing path requires modifying production code. |
+| **Proposed Solution** | Inject the path through the constructor and expose the return window through a single configurable source, with the current values as defaults. |
+| **Other Member's Code** | No, unless the window ends up in `Sale` (see `D2-V12`). |
 
 \* \*\*Verdict:\*\* \*\*Violation\*\*
 
@@ -348,6 +405,14 @@
 * `PromotionService.listActivePromotions()` uses `LocalDate.now()` while `findBestPromotionFor()` uses the sale date, so "active" has two meanings.
 * `PromotionRepository.loadAll()` assumes every line has the expected number of fields and throws on malformed lines; `split(",")` breaks if a name contains a comma.
 * `BulkPurchaseDiscount` is written as `percentage, minQuantity` but its constructor receives `minQuantity, percentage`; the order is easy to confuse.
+* `registerReturn()` calls `ret.calculateRefundAmount()` and ignores its result; ⚠️ verify it updates the stored refund, because the `Return` is created with `0.0`.
+* `registerReturn()` restores stock before `saveAll()`; if saving fails, stock stays restored without a saved return.
+* `findProductInSale()` does not check quantity, so passing the same product ID several times can return more units than were sold.
+* Nothing prevents returning the same product twice for the same sale.
+* `ReturnRepository.fromTextLine()` can add `null` when `productService.findById()` finds no product.
+* A reason containing a comma corrupts the line, because `split(",")` is used.
+* All validation errors use `IllegalArgumentException`, with no differentiated exception type.
+
 
 \## 4. Summary of Findings
 
@@ -364,4 +429,9 @@
 | `D2-V07` | Polymorphism | **Violation** | Promotions persistence | No |
 | `D2-V08` | Protected Variations | **Violation** | Promotions persistence | No |
 | `D2-V09` | High Cohesion | **Violation** | Promotions service | No |
+| `D2-V10` | Low Coupling | **Violation** | Returns persistence | No |
+| `D2-V11` | Low Coupling; Indirection cross-reference | **Violation** | Returns service | Yes, with Technical Leader (`SaleService`) |
+| `D2-V12` | Information Expert | **Violation** | Returns service | Yes, with Developer 1 (`Sale.canBeReturned`) |
+| `D2-V13` | High Cohesion | **Violation** | Returns service | Possible, with Technical Leader (`ConsoleMenu`) |
+| `D2-V14` | Protected Variations | **Violation** | Returns persistence and service | No |
 
