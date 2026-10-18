@@ -16,7 +16,7 @@
 
 \## Change log
 
-
+| `PersonRepository` | Paths injected through constructor, defaults kept | D2-V03 | Protected Variations | <hash> / PR #N | Developer 2 |
 
 | Class | Change made | Violation ID | Pattern applied | Commit / PR | Responsible |
 
