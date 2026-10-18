@@ -20,11 +20,28 @@ import java.util.List;
  */
 public class PromotionRepository {
 
-    private static final String FILE_PATH = "data/promotions.txt";
     private static final String FIELD_DELIMITER = ",";
 
+    private final String filePath;
+
+    /**
+     * Creates a repository that uses the default promotions file.
+     */
+    public PromotionRepository() {
+        this("data/promotions.txt");
+    }
+
+    /**
+     * Creates a repository that reads and writes the given file.
+     *
+     * @param filePath path of the promotions file
+     */
+    public PromotionRepository(String filePath) {
+        this.filePath = filePath;
+    }
+
     public void saveAll(List<Promotion> promotions) {
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
             parent.mkdirs();
@@ -42,7 +59,7 @@ public class PromotionRepository {
 
     public List<Promotion> loadAll() {
         List<Promotion> promotions = new ArrayList<>();
-        File file = new File(FILE_PATH);
+        File file = new File(filePath);
 
         if (!file.exists()) {
             return promotions;
