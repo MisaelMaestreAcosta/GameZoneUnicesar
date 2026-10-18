@@ -56,15 +56,14 @@
 
 \#### Well-Applied Evidence
 
-* (2.1 Information Expert) `AccessoryService.findAccessoriesCompatibleWith()` filters using `Accessory.getCompatibleConsoleIds()`, data owned by the accessory itself.
-
-
-
 \* `Person` owns `name`, `id` and `phone`. `Customer` and `Seller` implement `getRoleDescription()` using their own data (`email`, `employeeCode`, `shift`).
 
 \* `PersonService.findCustomerById()` and `findSellerById()` search the collections held by the service itself.
 
+`AccessoryService.findAccessoriesCompatibleWith()` filters using `Accessory.getCompatibleConsoleIds()`, data owned by the accessory itself.
 
+`PromotionService.findBestPromotionFor()` delegates the discount computation to each 
+`Promotion.calculateDiscount(Sale)` and `Promotion.isActive()`, which hold the rules, and only compares the results.
 
 \### 2.2 Creator
 
@@ -76,11 +75,13 @@
 
 \#### Well-Applied Evidence
 
-* (2.2 Creator) `AccessoryRepository.fromTextLine()` creates `Controller`, `Cable` and `Memory` because it holds the file data needed to build them. `AccessoryService.registerController/Cable/Memory()` create the accessories and manage the collection.
+ `AccessoryService.registerController/Cable/Memory()` create the accessories and manage the collection.
 
 \* `PersonRepository.loadCustomers()` and `loadSellers()` create `Customer` and `Seller` instances because they hold the file data needed to build them.
 
+`AccessoryRepository.fromTextLine()` creates `Controller`, `Cable` and `Memory` because it holds the file data needed to build them.
 
+`PromotionRepository.fromTextLine()` creates the promotion subclasses because it holds the file data. `PromotionService.registerPercentageDiscount()` and `registerBulkPurchaseDiscount()` create the promotions and manage the collection.
 
 \### 2.3 Controller
 
@@ -92,11 +93,12 @@
 
 \#### Well-Applied Evidence
 
-* (2.3 Controller) `AccessoryService` coordinates register, list, find and `updateStock` and delegates persistence to `AccessoryRepository`.
 
 \* `PersonService` coordinates the person use cases (register, list, find) and delegates persistence to `PersonRepository`. The model classes do not receive system events.
 
+`AccessoryService` coordinates register, list, find and `updateStock` and delegates persistence to `AccessoryRepository`.
 
+`PromotionService` coordinates register, list, find and best-promotion selection, and delegates persistence to `PromotionRepository`.
 
 \### 2.4 Low Coupling
 
@@ -107,14 +109,15 @@
 
 
 \#### Well-Applied Evidence
-
-* (2.4 Low Coupling) `AccessoryService` receives `AccessoryRepository` through its constructor and the accessory model classes perform no file I/O.																																																		
+					
 
 \* `Person`, `Customer` and `Seller` perform no file I/O and depend only on the `Person` base class.
 
 \* `PersonService` receives `PersonRepository` through its constructor.
 
+`AccessoryService` receives `AccessoryRepository` through its constructor and the accessory model classes perform no file I/O.
 
+`PromotionService` receives `PromotionRepository` through its constructor, and the promotion model classes perform no file I/O.
 
 \### 2.5 High Cohesion
 
@@ -170,6 +173,16 @@
 
 | \*\*Other Member's Code\*\* | No other member's code is required. |
 
+| Field | Finding D2-V09 |
+| :--- | :--- |
+| **ID** | `D2-V09` |
+| **Pattern** | High Cohesion |
+| **Module** | Promotions (Requirement 2) |
+| **Evidence** | `PromotionService.registerPercentageDiscount()` and `registerBulkPurchaseDiscount()` create the promotion and persist it without validating dates, percentage or minimum quantity; `PromotionService.findBestPromotionFor()` also embeds the best-discount selection loop. |
+| **Explanation** | ⚠️ Confirm in your repo whether a validator already covers promotions. If it does not, validation is missing from this layer. The selection rule is a second responsibility inside a registration/listing service. |
+| **Consequence** | The best-promotion rule cannot change or be reused without editing the service. |
+| **Proposed Solution** | Extract the selection rule into a dedicated class (Pure Fabrication) used by the service, keeping the same result, including ties and no-promotion cases. |
+| **Other Member's Code** | No other member's code is required. |
 
 
 \### 2.6 Polymorphism
@@ -202,6 +215,17 @@
 | **Other Member's Code** | No code of `Accessory`, `Controller`, `Cable` or `Memory` (Developer 1) needs changes, because serializers are separate classes. |
 
 
+| Field | Finding D2-V07 |
+| :--- | :--- |
+| **ID** | `D2-V07` |
+| **Pattern** | Polymorphism |
+| **Module** | Promotions (Requirement 2) |
+| **Evidence** | `PromotionRepository.toTextLine()` uses an `instanceof` chain over `PercentageDiscount`, `CategoryDiscount` and `BulkPurchaseDiscount`. `fromTextLine()` uses a `switch` over the strings `"PERCENTAGE"`, `"CATEGORY"` and `"BULK"`. |
+| **Explanation** | Serialization and deserialization depend on the concrete promotion type through conditionals, the same structure recorded in `D2-V04` for accessories. |
+| **Consequence** | Adding a promotion type requires editing two existing repository methods, and a missed branch only fails at runtime with `IllegalArgumentException`. |
+| **Proposed Solution** | One serializer per promotion type behind a common interface, looked up by type key. File format, field order and content stay identical. |
+| **Other Member's Code** | No code of the promotion hierarchy (Developer 1) needs changes, because the serializers are separate classes. |
+
 \### 2.7 Pure Fabrication
 
 
@@ -212,11 +236,13 @@
 
 \#### Well-Applied Evidence
 
-* (2.7 Pure Fabrication) `AccessoryRepository` encapsulates flat-file persistence for accessories.
+
 
 \* `PersonRepository` encapsulates flat-file persistence so the domain classes stay free of I/O.
 
+`AccessoryRepository` encapsulates flat-file persistence for accessories.
 
+`PromotionRepository` encapsulates flat-file persistence for promotions.
 
 \### 2.8 Indirection
 
@@ -228,11 +254,12 @@
 
 \#### Well-Applied Evidence
 
-* (2.8 Indirection) `AccessoryRepository` mediates between `AccessoryService` and `data/accessories.txt`.
 
 \* `PersonRepository` mediates between `PersonService` and the data files. The validation overlap is recorded once, in `D2-V01`.
 
+`AccessoryRepository` mediates between `AccessoryService` and `data/accessories.txt`.
 
+`PromotionRepository` mediates between `PromotionService` and `data/promotions.txt`.
 
 \### 2.9 Protected Variations
 
@@ -269,40 +296,34 @@
 | :--- | :--- |
 
 | **ID** | `D2-V06` |
-
 | **Pattern** | Protected Variations |
-
 | **Module** | Accessories (Requirement 1) |
-
 | **Evidence** | `AccessoryRepository` fixes `FILE_PATH`, `FIELD_DELIMITER` and `LIST_DELIMITER` as `static final` constants, and `AccessoryService` depends on the concrete class. |
-
 | **Explanation** | The storage location and format cannot vary without editing the class, the same situation as `D2-V03`. |
-
 | **Consequence** | Testing with another path or changing the format requires modifying production code. |
-
 | **Proposed Solution** | Inject the path through the constructor, with the current value as default. |
-
 | **Other Member's Code** | No other member's code is required. |
-
 | Field | Finding D2-V03 |
-
 | :--- | :--- |
-
 | \*\*ID\*\* | `D2-V03` |
-
 | \*\*Pattern\*\* | Protected Variations |
-
 | \*\*Module\*\* | Persons (Workshop 1) |
-
-| \*\*Evidence\*\* | `PersonRepository` fixes `CUSTOMERS\_PATH`, `SELLERS\_PATH` and `DELIMITER` as `static final` constants, and `PersonService` depends on the concrete class. |
-
+| \*\*Evidence\*\* | `PersonRepository` fixes `CUSTOMERS\_PATH`, `SELLERS\_PATH` and `DELIMITER` as `static final` constants, and `PersonService` depends on the concrete class.|
 | \*\*Explanation\*\* | The storage location and format cannot vary without editing the class. |
-
 | \*\*Consequence\*\* | Changing the file format or location, or testing with another path, requires modifying production code. |
-
 | \*\*Proposed Solution\*\* | Inject the paths through the constructor, using the current values as defaults. |
-
 | \*\*Other Member's Code\*\* | No other member's code is required. |
+
+| Field | Finding D2-V08 |
+| :--- | :--- |
+| **ID** | `D2-V08` |
+| **Pattern** | Protected Variations |
+| **Module** | Promotions (Requirement 2) |
+| **Evidence** | `PromotionRepository` fixes `FILE_PATH` and `FIELD_DELIMITER` as `static final` constants, and `PromotionService` depends on the concrete class. |
+| **Explanation** | The storage location and format cannot vary without editing the class, the same situation as `D2-V03` and `D2-V06`. |
+| **Consequence** | Testing with another path or changing the format requires modifying production code. |
+| **Proposed Solution** | Inject the path through the constructor, with the current value as default. |
+| **Other Member's Code** | No other member's code is required. |
 
 
 
@@ -323,9 +344,11 @@
 * `AccessoryService.register*()` perform no validation (duplicate IDs, negative price or quantity); this is recorded in the exceptions and validation block.
 * `AccessoryService.findById()` returns `null` while `updateStock()` throws `IllegalArgumentException`, which is inconsistent with `PersonService`, which returns `Optional`.
 * `Cable.getLenght()` is misspelled (Developer 1's code); reported to the Technical Leader.
+* `PromotionService.findById()` returns `null`, unlike `PersonService`, which returns `Optional`.
+* `PromotionService.listActivePromotions()` uses `LocalDate.now()` while `findBestPromotionFor()` uses the sale date, so "active" has two meanings.
+* `PromotionRepository.loadAll()` assumes every line has the expected number of fields and throws on malformed lines; `split(",")` breaks if a name contains a comma.
+* `BulkPurchaseDiscount` is written as `percentage, minQuantity` but its constructor receives `minQuantity, percentage`; the order is easy to confuse.
 
-
-r
 \## 4. Summary of Findings
 
 
@@ -338,4 +361,7 @@ r
 | `D2-V04` | Polymorphism | **Violation** | Accessories persistence | No |
 | `D2-V05` | Protected Variations; Polymorphism cross-reference | **Violation** | Accessories service | Possible, with Developer 1 |
 | `D2-V06` | Protected Variations | **Violation** | Accessories persistence | No |
+| `D2-V07` | Polymorphism | **Violation** | Promotions persistence | No |
+| `D2-V08` | Protected Variations | **Violation** | Promotions persistence | No |
+| `D2-V09` | High Cohesion | **Violation** | Promotions service | No |
 
