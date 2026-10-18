@@ -1,6 +1,9 @@
 \# GRASP Refactor Log
 
-
+| Clase | Variación Implementada | ID de Variación | Principio de Diseño | Commit / PR | Responsable |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **AccessoryRepository** | File path injected through constructor, default path preserved | V-XX | Protected Variations | `<hash>` / PR #N | Developer 2 |
+| **PersonRepository** | Paths injected through constructor, defaults kept | V-XX | Protected Variations | `<hash>` / PR #N | Developer 2 |
 
 \## Non-regression strategy
 
