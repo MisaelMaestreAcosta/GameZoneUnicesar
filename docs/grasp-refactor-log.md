@@ -2,10 +2,11 @@
 
 | Clase | Variación Implementada | ID de Variación | Principio de Diseño | Commit / PR | Responsable |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **AccessoryRepository** | File path injected through constructor, default path preserved | D2-V03 | Protected Variations | `<hash>` / PR #N | Developer 2 |
-| **PersonRepository** | Paths injected through constructor, defaults kept | D2-V06 | Protected Variations | `<hash>` / PR #N | Developer 2 |
-| **PromotionRepository** | File path injected through constructor, default path preserved | D2-V08 | Protected Variations | `<hash>` / PR #N | Developer 2 |
-| **ReturnRepository** | File path injected through constructor, default path preserved | D2-V14 | Protected Variations | `<hash>` / PR #N | Developer 2 |
+| **AccessoryRepository** | File path injected through constructor, default path preserved | D2-V03 | Protected Variations | `<hash>` / PR #1 | Developer 2 |
+| **PersonRepository** | Paths injected through constructor, defaults kept | D2-V06 | Protected Variations | `<hash>` / PR #2 | Developer 2 |
+| **PromotionRepository** | File path injected through constructor, default path preserved | D2-V08 | Protected Variations | `<hash>` / PR #3 | Developer 2 |
+| **ReturnRepository** | File path injected through constructor, default path preserved | D2-V14 | Protected Variations | `<hash>` / PR #4 | Developer 2 |
+| **WarrantyRepository** | File path injected through constructor, default path preserved | D2-V17 | Protected Variations | `<hash>` / PR #5 | Developer 2 |
 
 \## Non-regression strategy
 
