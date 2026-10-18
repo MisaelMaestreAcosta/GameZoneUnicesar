@@ -1,6 +1,6 @@
 # GRASP Pattern Audit - Developer 2
 
-**Author:** <your name>
+**Author:** <Rafael De Jesús Vega Oñate>
 **Role:** Developer 2
 
 ---
