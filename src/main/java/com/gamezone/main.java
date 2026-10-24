@@ -35,6 +35,7 @@ public class main {
 
         AccessoryService accessoryService = new AccessoryService(accessoryRepo);
         SaleService saleService = new SaleService(saleRepo, productService, accessoryService);
+        saleService.setPersonService(personService);
 
         PromotionService promotionService = new PromotionService(promotionRepo);
         saleService.setPromotionService(promotionService);

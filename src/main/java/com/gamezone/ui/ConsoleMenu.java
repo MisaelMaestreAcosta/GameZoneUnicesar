@@ -279,23 +279,13 @@ public class ConsoleMenu {
     }
 
     private List<Sale> getAllSalesInternal() {
-        List<Customer> customers = personService.listCustomers();
-        List<Seller> sellers = personService.listSellers();
-        List<Product> products = productService.listAllProducts();
-        return saleService.listAllSales(customers, sellers, products);
+        return saleService.listAllSales();
     }
 
     private void showSalesHistory() {
         System.out.println("\n--- HISTORIAL DE VENTAS REGISTRADAS ---");
 
         List<Sale> sales = getAllSalesInternal();
-        if (sales.isEmpty()) {
-            // Fallback if personService wasn't linked inside SaleService
-            List<Customer> customers = personService.listCustomers();
-            List<Seller> sellers = personService.listSellers();
-            List<Product> products = productService.listAllProducts();
-            sales = saleService.listAllSales(customers, sellers, products);
-        }
 
 
         if (sales.isEmpty()) {
@@ -596,7 +586,7 @@ public class ConsoleMenu {
         String saleId = scanner.nextLine().trim();
 
 
-        Sale sale = getAllSalesInternal().stream().filter(s -> s.getId().equals(saleId)).findFirst().orElse(null);
+        Sale sale = saleService.findById(saleId);
 
         if (sale == null) {
             System.out.println("Error: No se encontró ninguna venta con el ID '" + saleId + "'.");
@@ -741,7 +731,7 @@ public class ConsoleMenu {
 
             // Calculate components for detailed display
 
-            List<Sale> allSales = saleService.listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
+            List<Sale> allSales = saleService.listAllSales();
             double totalSales = allSales.stream()
 
 
