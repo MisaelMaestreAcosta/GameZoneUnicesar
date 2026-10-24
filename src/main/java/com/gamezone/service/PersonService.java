@@ -2,18 +2,20 @@ package com.gamezone.service;
 
 import com.gamezone.model.Customer;
 import com.gamezone.model.Seller;
-import com.gamezone.persistence.PersonRepository;
+import com.gamezone.persistence.IPersonRepository;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public class PersonService {
-    private final PersonRepository personRepository;
+
+    // Ahora se depende de la abstracción (IPersonRepository) y no de la clase concreta
+    private final IPersonRepository personRepository;
     private final List<Customer> customers;
     private final List<Seller> sellers;
 
-    public PersonService(PersonRepository personRepository) {
+    public PersonService(IPersonRepository personRepository) {
         this.personRepository = personRepository;
         this.customers = personRepository.loadCustomers();
         this.sellers = personRepository.loadSellers();
@@ -33,7 +35,6 @@ public class PersonService {
     }
 
     public List<Customer> listCustomers() {
-        // Retorna una vista inmodificable para proteger el estado interno
         return Collections.unmodifiableList(customers);
     }
 
