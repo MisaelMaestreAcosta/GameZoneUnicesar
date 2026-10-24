@@ -240,3 +240,33 @@
 | **Respuesta** | Se explicó el concepto de validación de nulidad (Guards). Se sugirió envolver la lógica de impresión del descuento en un condicional `if (sale.getPromotion() != null)`, evitando así que la JVM intente acceder a métodos de una referencia inexistente en la memoria. |
 | **Decisión** | Se añadieron guardas de validación (`if != null`) en el método `printTicket()` de la clase `Sale`. Si no hay promoción asignada, el ticket omite la línea de descuento e imprime directamente el total regular. |
 | **Commit relacionado** | `fix(sale): guard against NullPointerException when printing sales without promos` |
+
+<br>
+
+## 17. Arquitectura de Manejo de Excepciones Diferenciadas en la UI
+
+| Campo | Contenido |
+| :--- | :--- |
+| **Fecha** | 10 de octubre de 2026 |
+| **Herramienta** | Gemini Pro |
+| **Fase y rama** | Fase de manejo de excepciones - Rama: `feature/exception-handling` |
+| **Objetivo** | Refactorizar la capa de presentación (`ConsoleMenu`) para capturar excepciones personalizadas tipadas y mostrar mensajes claros y orientados al usuario sin volcar trazas técnicas (`stack traces`). |
+| **Consulta** | "¿Cómo estructuro los bloques try-catch en el menú de consola para atrapar de forma diferenciada ResourceNotFoundException, BusinessRuleException, InvalidDataException y PersistenceException sin duplicar código en todas las opciones?" |
+| **Respuesta** | Se explicó la estrategia de captura jerárquica: atrapar primero las excepciones específicas de dominio heredadas de `GameZoneException` con mensajes contextuales, seguido de excepciones de conversión de tipos (`NumberFormatException`) y un bloque `catch (Exception e)` de respaldo para fallos inesperados. |
+| **Decisión** | Se refactorizaron los métodos de captura de datos y ejecución de casos de uso en `ConsoleMenu.java`, proporcionando mensajes diferenciados y amigables en español. |
+| **Commit relacionado** | `refactor: handle custom exceptions in ConsoleMenu with user-friendly messages` |
+
+<br>
+
+## 18. Auditoría y Refactorización Basada en Patrones GRASP
+
+| Campo | Contenido |
+| :--- | :--- |
+| **Fecha** | 24 de octubre de 2026 |
+| **Herramienta** | Gemini Pro |
+| **Fase y rama** | Fase de auditoría y refactorización - Rama: `feature/grasp-refactor` |
+| **Objetivo** | Resolver violaciones de patrones GRASP (Creator, Information Expert, Controller e Indirection) en las clases asignadas al Líder Técnico (`Sale`, `SaleService`, `ConsoleMenu`), garantizando cero regresión funcional. |
+| **Consulta** | "¿Cómo refactorizo ConsoleMenu para que no cree directamente la instancia de Sale con UUID ni calcule si una venta supera 30 días, respetando los patrones Creator e Information Expert?" |
+| **Respuesta** | Se propuso encapsular la regla de los 30 días en `Sale.canBeReturned()` (Information Expert), crear el método fábrica `SaleService.createSale(Customer, Seller)` (Creator) y habilitar a `SaleService` para resolver sus dependencias internamente en `listAllSales()` y `findById()` (Indirection y Controller). |
+| **Decisión** | Se implementaron los cambios en `Sale`, `SaleService`, `ConsoleMenu` y `main.java` mediante commits atómicos documentados con sus IDs de variación en `docs/grasp-refactor-log.md`. |
+| **Commit relacionado** | `refactor: resolve sales query collaborators within SaleService (L-V04, L-V11)` |

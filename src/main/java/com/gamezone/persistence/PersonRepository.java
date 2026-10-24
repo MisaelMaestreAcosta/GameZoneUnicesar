@@ -21,16 +21,32 @@ public class PersonRepository implements IPersonRepository {
     private final Path customersPath;
     private final Path sellersPath;
 
+
+    /**
+     * Creates a repository that uses the default data files.
+     */
+
+
     public PersonRepository() {
         this(Paths.get("data", "customers.txt"), Paths.get("data", "sellers.txt"));
     }
+
+
+   /**
+     * Creates a repository that reads and writes the given files.
+     *
+     * @param customersPath path of the customers file
+     * @param sellersPath   path of the sellers file
+     */
 
     public PersonRepository(Path customersPath, Path sellersPath) {
         this.customersPath = customersPath;
         this.sellersPath = sellersPath;
     }
 
+
     @Override
+
     public void saveCustomers(List<Customer> customers) {
         List<String> lines = new ArrayList<>();
         for (Customer c : customers) {

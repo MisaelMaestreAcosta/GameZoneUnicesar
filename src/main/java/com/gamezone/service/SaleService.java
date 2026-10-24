@@ -12,6 +12,7 @@ import com.gamezone.service.AccessoryService;
 
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service class responsible for managing sales operations, business rules,
@@ -23,10 +24,9 @@ public class SaleService {
     private final ProductService productService;
 
     private WarrantyService warrantyService;
-
     private AccessoryService accessoryService;
-
-
+    private PromotionService promotionService;
+    private PersonService personService;
 
     public SaleService(SaleRepository saleRepository, ProductService productService, WarrantyService warrantyService) {
         this.saleRepository = saleRepository;
@@ -38,10 +38,26 @@ public class SaleService {
         this.warrantyService = warrantyService;
     }
 
-    public Sale findById(String id) {
-        return null; // Stub to satisfy compilation. Real implementation requires PersonService.
+    public void setPersonService(PersonService personService) {
+        this.personService = personService;
     }
 
+    /**
+     * Looks up a sale transaction by its unique identifier.
+     * Fulfills GRASP Controller and Indirection patterns by resolving collaborators internally.
+     *
+     * @param id the sale identifier to search
+     * @return the matching Sale, or null if not found
+     */
+    public Sale findById(String id) {
+        if (id == null) {
+            return null;
+        }
+        return listAllSales().stream()
+                .filter(sale -> sale.getId().equalsIgnoreCase(id.trim()))
+                .findFirst()
+                .orElse(null);
+    }
 
     public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService) {
         this.saleRepository = saleRepository;
@@ -49,11 +65,21 @@ public class SaleService {
         this.accessoryService = accessoryService;
     }
 
-
-    private PromotionService promotionService;
-
     public void setPromotionService(PromotionService promotionService) {
         this.promotionService = promotionService;
+    }
+
+    /**
+     * Creates a new Sale instance with an automatically generated unique transaction identifier.
+     * Follows the GRASP Creator pattern by shielding the presentation layer from entity instantiation.
+     *
+     * @param customer customer associated with the transaction
+     * @param seller seller attending the transaction
+     * @return initialized Sale instance
+     */
+    public Sale createSale(Customer customer, Seller seller) {
+        String saleId = "V-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase();
+        return new Sale(saleId, customer, seller);
     }
 
     /**
@@ -126,6 +152,19 @@ public class SaleService {
 
         // 6. Persistir la venta.
         saleRepository.save(sale);
+    }
+
+    /**
+     * Retrieves all recorded sales by resolving person and product collaborators internally.
+     * Upholds the GRASP Indirection pattern by decoupling clients from secondary service dependencies.
+     *
+     * @return list of reconstructed sales
+     */
+    public List<Sale> listAllSales() {
+        if (personService == null || productService == null) {
+            return java.util.Collections.emptyList();
+        }
+        return listAllSales(personService.listCustomers(), personService.listSellers(), productService.listAllProducts());
     }
 
     public List<Sale> listAllSales(List<Customer> customers, List<Seller> sellers, List<Product> products) {
