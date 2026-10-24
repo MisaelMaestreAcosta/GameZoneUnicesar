@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PersonRepository {
+public class PersonRepository implements IPersonRepository {
 
     private static final Logger LOGGER = Logger.getLogger(PersonRepository.class.getName());
     private static final String DELIMITER = ",";
@@ -21,23 +21,31 @@ public class PersonRepository {
     private final Path customersPath;
     private final Path sellersPath;
 
+
     /**
      * Creates a repository that uses the default data files.
      */
+
+
     public PersonRepository() {
         this(Paths.get("data", "customers.txt"), Paths.get("data", "sellers.txt"));
     }
 
-    /**
+
+   /**
      * Creates a repository that reads and writes the given files.
      *
      * @param customersPath path of the customers file
      * @param sellersPath   path of the sellers file
      */
+
     public PersonRepository(Path customersPath, Path sellersPath) {
         this.customersPath = customersPath;
         this.sellersPath = sellersPath;
     }
+
+
+    @Override
 
     public void saveCustomers(List<Customer> customers) {
         List<String> lines = new ArrayList<>();
@@ -47,6 +55,7 @@ public class PersonRepository {
         writeToFile(customersPath, lines);
     }
 
+    @Override
     public List<Customer> loadCustomers() {
         List<Customer> customers = new ArrayList<>();
         List<String> lines = readAllLines(customersPath);
@@ -60,6 +69,7 @@ public class PersonRepository {
         return customers;
     }
 
+    @Override
     public void saveSellers(List<Seller> sellers) {
         List<String> lines = new ArrayList<>();
         for (Seller s : sellers) {
@@ -68,6 +78,7 @@ public class PersonRepository {
         writeToFile(sellersPath, lines);
     }
 
+    @Override
     public List<Seller> loadSellers() {
         if (!Files.exists(sellersPath)) {
             return initializeDefaultSellers();
