@@ -605,14 +605,7 @@ public class ConsoleMenu {
         }
 
 
-        // TODO: Uncomment when canBeReturned is implemented by Desarrollador 1
-        // if (!sale.canBeReturned()) {
-        //     System.out.println("Error: La venta indicada supera los 30 días calendario permitidos para devoluciones.");
-        //     return;
-        // }
-
-        long daysSinceSale = java.time.temporal.ChronoUnit.DAYS.between(sale.getDate().toLocalDate(), java.time.LocalDate.now());
-        if (daysSinceSale > 30) {
+        if (!sale.canBeReturned()) {
             System.out.println("Error: La venta indicada supera los 30 días calendario permitidos para devoluciones.");
             return;
         }

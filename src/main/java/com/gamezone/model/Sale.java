@@ -84,8 +84,17 @@ public class Sale {
         }
     }
 
+    /**
+     * Checks if the sale is eligible for returns based on the 30-day policy.
+     *
+     * @return true if 30 days or less have passed since the sale date, false otherwise
+     */
     public boolean canBeReturned() {
-        return true;
+        if (this.date == null) {
+            return false;
+        }
+        long daysSinceSale = java.time.temporal.ChronoUnit.DAYS.between(this.date.toLocalDate(), java.time.LocalDate.now());
+        return daysSinceSale <= 30;
     }
 
     public String getId() {
