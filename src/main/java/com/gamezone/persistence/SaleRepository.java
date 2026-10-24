@@ -20,7 +20,7 @@ import java.util.List;
  * Handles flat-file data persistence for sales transactions in the GameZone
  * system.
  */
-public class SaleRepository {
+public class SaleRepository implements ISaleRepository {
 
     private final Path filePath;
     private static final String SEPARATOR = ";";
@@ -48,6 +48,7 @@ public class SaleRepository {
      *
      * @param sale The sale to persist
      */
+    @Override
     public void save(Sale sale) {
         try (BufferedWriter writer = Files.newBufferedWriter(filePath, java.nio.file.StandardOpenOption.APPEND)) {
             // Write Sale Header: SALE;id;date;customer;seller;total;promotionName;discount;warrantyCost
@@ -87,6 +88,7 @@ public class SaleRepository {
      * Reads all recorded sales headers and items, linking them to existing
      * products and persons.
      */
+    @Override
     public List<Sale> loadAll(List<Customer> customers, List<Seller> sellers, List<Product> products) {
         List<Sale> sales = new ArrayList<>();
         if (Files.notExists(filePath)) {

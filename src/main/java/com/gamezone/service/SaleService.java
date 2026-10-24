@@ -5,7 +5,7 @@ import com.gamezone.model.Product;
 import com.gamezone.model.Sale;
 import com.gamezone.model.SalesLineItem;
 import com.gamezone.model.Seller;
-import com.gamezone.persistence.SaleRepository;
+import com.gamezone.persistence.ISaleRepository;
 import com.gamezone.model.Accessory;
 import com.gamezone.service.AccessoryService;
 
@@ -20,7 +20,7 @@ import java.util.UUID;
  */
 public class SaleService {
 
-    private final SaleRepository saleRepository;
+    private final ISaleRepository saleRepository;
     private final ProductService productService;
 
     private WarrantyService warrantyService;
@@ -28,7 +28,7 @@ public class SaleService {
     private PromotionService promotionService;
     private PersonService personService;
 
-    public SaleService(SaleRepository saleRepository, ProductService productService, WarrantyService warrantyService) {
+    public SaleService(ISaleRepository saleRepository, ProductService productService, WarrantyService warrantyService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.warrantyService = warrantyService;
@@ -59,7 +59,7 @@ public class SaleService {
                 .orElse(null);
     }
 
-    public SaleService(SaleRepository saleRepository, ProductService productService, AccessoryService accessoryService) {
+    public SaleService(ISaleRepository saleRepository, ProductService productService, AccessoryService accessoryService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.accessoryService = accessoryService;
