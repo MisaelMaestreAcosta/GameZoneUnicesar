@@ -32,3 +32,18 @@ Sistema de información en Java para la gestión de la tienda de videojuegos Gam
 * **Category Discount Integration:** Extends Category Discounts to be applicable specifically to Accessories.
 * **Integrated Returns & Refunds:** Accurately recalculates proportional refunds for items bought under a promotion. *(Note: Restoring accessory stock and automatically canceling warranties for returned consoles are pending implementation by other roles)*.
 * **Unified Financial Reports:** *(Pending implementation by other roles: Generates an accurate monthly balance that integrates promotional discounts, extended warranty revenues, and valid returns).*
+
+### ⚠️ Exception Handling & Validation Architecture (Módulo de Excepciones - Requerimiento 6)
+* **Typed Custom Exception Hierarchy:** Base abstract runtime exception `GameZoneException` specialized into four domain-specific exceptions: `ResourceNotFoundException`, `BusinessRuleException`, `InvalidDataException`, and `PersistenceException`.
+* **Centralized Validation Layer:** Dedicated validator classes (`PersonValidator`, `ProductValidator`, `SaleValidator`) enforcing structural, existence, and business constraints before service execution.
+* **Differentiated User-Friendly Messaging:** Refactored presentation layer (`ConsoleMenu`) catching typed exceptions with targeted, readable feedback for end users without cryptic stack traces.
+
+### 📐 GRASP Patterns Audit & Architectural Refactoring (Requerimiento 7)
+* **Comprehensive Design Pattern Audit:** In-depth evaluation of Craig Larman's 9 GRASP principles (Information Expert, Creator, Controller, Low Coupling, High Cohesion, Polymorphism, Pure Fabrication, Indirection, Protected Variations) across all domain, service, persistence, and presentation classes.
+* **Consolidated Guiding Analysis:** Cross-module evaluation documenting boundary violations, non-regression verification protocol, and sequential git coordination.
+* **Architectural Refactoring:**
+  * **Information Expert:** Return eligibility window (30 calendar days) encapsulated in `Sale.canBeReturned()`.
+  * **Creator:** Instantiation of sales aggregates and ID generation centralized in `SaleService.createSale()`.
+  * **Controller & Indirection:** `SaleService` manages internal resolution of customer, seller, and product collaborators, exposing `listAllSales()` and `findById(id)` without UI mediation.
+  * **Protected Variations:** Parameterized persistence file paths injected via constructor across all repositories, maintaining stable default paths.
+* **Deterministic Non-Regression Strategy:** Documented in `docs/grasp-refactor-log.md` ensuring identical input/output operational behavior and zero compile-time warnings.
