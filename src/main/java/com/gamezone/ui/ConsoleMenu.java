@@ -229,8 +229,7 @@ public class ConsoleMenu {
             return;
         }
 
-        String saleId = "V-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase();
-        Sale sale = new Sale(saleId, customerOpt.get(), sellerOpt.get());
+        Sale sale = saleService.createSale(customerOpt.get(), sellerOpt.get());
 
         List<String> extendedWarrantyProducts = new ArrayList<>();
         boolean addingProducts = true;

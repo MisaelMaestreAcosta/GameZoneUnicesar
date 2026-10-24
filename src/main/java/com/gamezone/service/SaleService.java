@@ -12,6 +12,7 @@ import com.gamezone.service.AccessoryService;
 
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service class responsible for managing sales operations, business rules,
@@ -54,6 +55,19 @@ public class SaleService {
 
     public void setPromotionService(PromotionService promotionService) {
         this.promotionService = promotionService;
+    }
+
+    /**
+     * Creates a new Sale instance with an automatically generated unique transaction identifier.
+     * Follows the GRASP Creator pattern by shielding the presentation layer from entity instantiation.
+     *
+     * @param customer customer associated with the transaction
+     * @param seller seller attending the transaction
+     * @return initialized Sale instance
+     */
+    public Sale createSale(Customer customer, Seller seller) {
+        String saleId = "V-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase();
+        return new Sale(saleId, customer, seller);
     }
 
     /**
