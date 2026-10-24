@@ -47,3 +47,10 @@ Sistema de información en Java para la gestión de la tienda de videojuegos Gam
   * **Controller & Indirection:** `SaleService` manages internal resolution of customer, seller, and product collaborators, exposing `listAllSales()` and `findById(id)` without UI mediation.
   * **Protected Variations:** Parameterized persistence file paths injected via constructor across all repositories, maintaining stable default paths.
 * **Deterministic Non-Regression Strategy:** Documented in `docs/grasp-refactor-log.md` ensuring identical input/output operational behavior and zero compile-time warnings.
+
+### 🧩 SOLID Principles Audit & Architectural Refactoring (Requerimiento 8)
+* **Principles Audit:** Exhaustive evaluation of Robert C. Martin's 5 SOLID design principles (SRP, OCP, LSP, ISP, DIP) across domain entities, services, persistence, and console interfaces.
+* **Architectural Refactoring:**
+  * **Dependency Inversion Principle (DIP):** Decoupled `SaleService` from concrete flat-file persistence by introducing the `ISaleRepository` interface and constructor injection.
+  * **Single Responsibility Principle (SRP):** Isolated textual receipt ASCII formatting from the `Sale` domain entity into dedicated `SaleReceiptFormatter`.
+  * **Non-Regression Verification:** Documented in `docs/solid-refactor-log.md` with zero compile-time errors and 100% operational preservation.

@@ -270,3 +270,18 @@
 | **Respuesta** | Se propuso encapsular la regla de los 30 días en `Sale.canBeReturned()` (Information Expert), crear el método fábrica `SaleService.createSale(Customer, Seller)` (Creator) y habilitar a `SaleService` para resolver sus dependencias internamente en `listAllSales()` y `findById()` (Indirection y Controller). |
 | **Decisión** | Se implementaron los cambios en `Sale`, `SaleService`, `ConsoleMenu` y `main.java` mediante commits atómicos documentados con sus IDs de variación en `docs/grasp-refactor-log.md`. |
 | **Commit relacionado** | `refactor: resolve sales query collaborators within SaleService (L-V04, L-V11)` |
+
+<br>
+
+## 19. Auditoría y Refactorización Basada en Principios SOLID
+
+| Campo | Contenido |
+| :--- | :--- |
+| **Fecha** | 24 de octubre de 2026 |
+| **Herramienta** | Gemini Pro |
+| **Fase y rama** | Fase de auditoría y refactorización SOLID - Rama: `feature/solid-refactor` |
+| **Objetivo** | Aplicar el Principio de Inversión de Dependencias (DIP) y el Principio de Responsabilidad Única (SRP) en las clases asignadas al Líder Técnico (`SaleService`, `SaleRepository` y `Sale`). |
+| **Consulta** | "¿Cómo desacoplo SaleService de la clase concreta SaleRepository creando una interfaz ISaleRepository, y cómo extraigo el formateo de recibos de Sale sin romper la compatibilidad?" |
+| **Respuesta** | Se recomendó definir la interfaz `ISaleRepository` con los métodos abstractos `save` y `loadAll`, inyectándola en `SaleService` (DIP, L-S04). Para SRP (L-S02), se recomendó extraer la construcción del texto ASCII a `SaleReceiptFormatter`, delegando la llamada desde `Sale.generateReceipt()`. |
+| **Decisión** | Se crearon `ISaleRepository` y `SaleReceiptFormatter`, actualizando `SaleRepository`, `SaleService` y `Sale.java` sin romper contratos observables ni pruebas de no regresión. |
+| **Commit relacionado** | `refactor: decouple SaleService by injecting ISaleRepository interface (L-S04)` |
