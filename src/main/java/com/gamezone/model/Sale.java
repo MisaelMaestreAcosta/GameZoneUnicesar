@@ -1,7 +1,6 @@
 package com.gamezone.model;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -171,32 +170,6 @@ public class Sale {
     }
 
     public String generateReceipt() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        StringBuilder sb = new StringBuilder();
-        sb.append("=========================================\n");
-        sb.append(String.format("FACTURA DE VENTA #%s\n", id));
-        sb.append(String.format("Fecha: %s\n", date.format(formatter)));
-        sb.append(String.format("Cliente: %s (ID: %s)\n", customer.getName(), customer.getId()));
-        sb.append(String.format("Vendedor: %s (ID: %s)\n", seller.getName(), seller.getId()));
-        sb.append("-----------------------------------------\n");
-        sb.append("DETALLE DE COMPRA:\n");
-        for (SalesLineItem item : items) {
-            sb.append(String.format("- %s\n", item.toString()));
-        }
-        sb.append("-----------------------------------------\n");
-        double subtotal = calculateSubtotal();
-        sb.append(String.format("SUBTOTAL: $%.2f\n", subtotal));
-        
-        if (appliedPromotionName != null && !appliedPromotionName.isEmpty()) {
-            sb.append(String.format("DESCUENTO (%s): -$%.2f\n", appliedPromotionName, discountAmount));
-        }
-
-        if (warrantyCost > 0) {
-            sb.append(String.format("GARANTIAS EXTENDIDAS: +$%.2f\n", warrantyCost));
-        }
-        
-        sb.append(String.format("TOTAL A PAGAR: $%.2f\n", calculateTotal()));
-        sb.append("=========================================");
-        return sb.toString();
+        return SaleReceiptFormatter.formatReceipt(this);
     }
 }
